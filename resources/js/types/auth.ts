@@ -5,13 +5,29 @@ export type User = {
     avatar?: string;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;
+
+    role:
+        | 'admin'
+        | 'planning_officer'
+        | 'kra_incharge'
+        | 'responsible_unit'
+        | 'viewer';
+
     created_at: string;
     updated_at: string;
+
     [key: string]: unknown;
 };
 
 export type Auth = {
     user: User;
+};
+
+export type SharedData = {
+    name: string;
+    auth: Auth;
+    sidebarOpen: boolean;
+    demoUsers: User[];
 };
 
 /* @chisel-passkeys */

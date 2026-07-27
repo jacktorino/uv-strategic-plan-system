@@ -1,140 +1,337 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
-BookOpen,
-ChartColumnBig,
-FolderGit2,
-TableProperties,
-Layers, // Example icon for KRA
-CheckCircle2,
-Building2,
-FlaskConical,
-GraduationCap,
-Users,
-UserCheck,
-BookOpenText, // Example icon for KRA
+    BookOpen,
+    ChartColumnBig,
+    FolderGit2,
+    TableProperties,
+    Layers,
+    CheckCircle2,
+    Building2,
+    FlaskConical,
+    GraduationCap,
+    Users,
+    UserCheck,
+    BookOpenText,
 } from 'lucide-react';
+
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+
 import {
-Sidebar,
-SidebarContent,
-SidebarFooter,
-SidebarHeader,
-SidebarMenu,
-SidebarMenuButton,
-SidebarMenuItem,
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
 } from '@/components/ui/sidebar';
+
 import { dashboard } from '@/routes';
-import type { NavItem } from '@/types';
-
-// Grouped Navigation Items
-const dashboardNavItems: NavItem[] = [
-{
-    title: 'Dashboard',
-    href: dashboard(),
-    icon: ChartColumnBig,
-},
-{
-    title: 'Compliance by Unit',
-    href: '/kra/evaluations', // Replace with actual route when ready
-    icon: TableProperties,
-},
-];
-
-const kraNavItems: NavItem[] = [
-{
-    title: 'KRA 1 · Governance',
-    href: '/kra/governance',
-    icon: Building2,
-},
-{
-    title: 'KRA 2 · Research',
-    href: '/kra/research',
-    icon: FlaskConical,
-},
-{
-    title: 'KRA 3 · Teaching',
-    href: '/kra/teaching',
-    icon: GraduationCap,
-},
-{
-    title: 'KRA 4 · Community',
-    href: '/kra/community',
-    icon: Users,
-},
-{
-    title: 'KRA 5 · Students',
-    href: '/kra/students',
-    icon: BookOpenText,
-},
-];
-
-const adminNavItems: NavItem[] = [
-{
-    title: 'Responsible Units',
-    href: '/responsible-units',
-    icon: UserCheck,
-},
-
-{
-    title: 'Accounts',
-    href: '/accounts',
-    icon: Users,
-},
-{ title: 'KPIs', href: '/kpis', icon: Layers },
-{ title: 'Action Plans', href: '/action-plans', icon: CheckCircle2 },
-];
-
-const footerNavItems: NavItem[] = [
-{
-    title: 'Repository',
-    href: 'https://github.com/laravel/react-starter-kit',
-    icon: FolderGit2,
-},
-{
-    title: 'Documentation',
-    href: 'https://laravel.com/docs/starter-kits#react',
-    icon: BookOpen,
-},
-];
+import type { NavItem, SharedData } from '@/types';
 
 export function AppSidebar() {
-return (
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton
-                        asChild
-                        className="h-auto justify-center py-4"
-                    >
-                        <Link
-                            href={dashboard()}
-                            prefetch
-                            className="w-full justify-center"
+    const { auth } = usePage<SharedData>().props;
+
+    const role = auth.user.role;
+
+    let dashboardNavItems: NavItem[] = [];
+    let kraNavItems: NavItem[] = [];
+    let adminNavItems: NavItem[] = [];
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === 'admin') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+            {
+                title: 'Compliance by Unit',
+                href: '/kra/evaluations',
+                icon: TableProperties,
+            },
+        ];
+
+        kraNavItems = [
+            {
+                title: 'KRA 1 · Governance',
+                href: '/kra/governance',
+                icon: Building2,
+            },
+            {
+                title: 'KRA 2 · Research',
+                href: '/kra/research',
+                icon: FlaskConical,
+            },
+            {
+                title: 'KRA 3 · Teaching',
+                href: '/kra/teaching',
+                icon: GraduationCap,
+            },
+            {
+                title: 'KRA 4 · Community',
+                href: '/kra/community',
+                icon: Users,
+            },
+            {
+                title: 'KRA 5 · Students',
+                href: '/kra/students',
+                icon: BookOpenText,
+            },
+        ];
+
+        adminNavItems = [
+            {
+                title: 'Responsible Units',
+                href: '/responsible-units',
+                icon: UserCheck,
+            },
+            {
+                title: 'Accounts',
+                href: '/accounts',
+                icon: Users,
+            },
+            {
+                title: 'KPIs',
+                href: '/kpis',
+                icon: Layers,
+            },
+            {
+                title: 'Action Plans',
+                href: '/action-plans',
+                icon: CheckCircle2,
+            },
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | PLANNING OFFICER
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === 'planning_officer') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+            {
+                title: 'Compliance by Unit',
+                href: '/kra/evaluations',
+                icon: TableProperties,
+            },
+        ];
+
+        kraNavItems = [
+            {
+                title: 'KRA 1 · Governance',
+                href: '/kra/governance',
+                icon: Building2,
+            },
+            {
+                title: 'KRA 2 · Research',
+                href: '/kra/research',
+                icon: FlaskConical,
+            },
+            {
+                title: 'KRA 3 · Teaching',
+                href: '/kra/teaching',
+                icon: GraduationCap,
+            },
+            {
+                title: 'KRA 4 · Community',
+                href: '/kra/community',
+                icon: Users,
+            },
+            {
+                title: 'KRA 5 · Students',
+                href: '/kra/students',
+                icon: BookOpenText,
+            },
+        ];
+
+        adminNavItems = [
+            {
+                title: 'KPIs',
+                href: '/kpis',
+                icon: Layers,
+            },
+            {
+                title: 'Action Plans',
+                href: '/action-plans',
+                icon: CheckCircle2,
+            },
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | KRA INCHARGE
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === 'kra_incharge') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+        ];
+
+        // Later replace these with auth.user.kras
+        kraNavItems = [
+            {
+                title: 'My KRAs',
+                href: '/kra',
+                icon: Building2,
+            },
+        ];
+
+        adminNavItems = [
+            {
+                title: 'KPIs',
+                href: '/kpis',
+                icon: Layers,
+            },
+            {
+                title: 'Action Plans',
+                href: '/action-plans',
+                icon: CheckCircle2,
+            },
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESPONSIBLE UNIT
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === 'responsible_unit') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+        ];
+
+        adminNavItems = [
+            {
+                title: 'My KPIs',
+                href: '/kpis',
+                icon: Layers,
+            },
+            {
+                title: 'Action Plans',
+                href: '/action-plans',
+                icon: CheckCircle2,
+            },
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | VIEWER
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === 'viewer') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+        ];
+
+        kraNavItems = [
+            {
+                title: 'KRA 1 · Governance',
+                href: '/kra/governance',
+                icon: Building2,
+            },
+            {
+                title: 'KRA 2 · Research',
+                href: '/kra/research',
+                icon: FlaskConical,
+            },
+            {
+                title: 'KRA 3 · Teaching',
+                href: '/kra/teaching',
+                icon: GraduationCap,
+            },
+            {
+                title: 'KRA 4 · Community',
+                href: '/kra/community',
+                icon: Users,
+            },
+            {
+                title: 'KRA 5 · Students',
+                href: '/kra/students',
+                icon: BookOpenText,
+            },
+        ];
+    }
+
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'Repository',
+            href: 'https://github.com/laravel/react-starter-kit',
+            icon: FolderGit2,
+        },
+        {
+            title: 'Documentation',
+            href: 'https://laravel.com/docs/starter-kits#react',
+            icon: BookOpen,
+        },
+    ];
+
+    return (
+        <Sidebar collapsible="icon" variant="inset">
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            asChild
+                            className="h-auto justify-center py-4"
                         >
-                            <AppLogo />
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+                            <Link
+                                href={dashboard()}
+                                prefetch
+                                className="w-full justify-center"
+                            >
+                                <AppLogo />
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
 
-        <SidebarContent>
-            {/* Pass grouped sections into NavMain */}
-            <NavMain
-                dashboardItems={dashboardNavItems}
-                kraItems={kraNavItems}
-                adminItems={adminNavItems}
-            />
-        </SidebarContent>
+            <SidebarContent>
+                <NavMain
+                    dashboardItems={dashboardNavItems}
+                    kraItems={kraNavItems}
+                    adminItems={adminNavItems}
+                />
+            </SidebarContent>
 
-        <SidebarFooter>
-            <NavFooter items={footerNavItems} className="mt-auto" />
-            <NavUser />
-        </SidebarFooter>
-    </Sidebar>
-);
+            <SidebarFooter>
+                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavUser />
+            </SidebarFooter>
+        </Sidebar>
+    );
 }
