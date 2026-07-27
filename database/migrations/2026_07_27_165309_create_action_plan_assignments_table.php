@@ -46,10 +46,10 @@ return new class extends Migration
             $table->timestamps();
 
             // One responsible unit can only be assigned once per action plan
-            $table->unique([
-                'action_plan_id',
-                'responsible_unit_id',
-            ]);
+            $table->unique(
+                ['action_plan_id', 'responsible_unit_id'],
+                'apa_plan_unit_unique'
+            );
         });
     }
 
