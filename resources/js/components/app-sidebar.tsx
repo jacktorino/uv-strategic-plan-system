@@ -1,5 +1,18 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import {
+    BookOpen,
+    ChartColumnBig,
+    FolderGit2,
+    TableProperties,
+    Layers, // Example icon for KRA
+    CheckCircle2,
+    Building2,
+    FlaskConical,
+    GraduationCap,
+    Users,
+    UserCheck,
+    BookOpenText, // Example icon for KRA
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,11 +29,45 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+// Grouped Navigation Items
+const dashboardNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: ChartColumnBig,
+    },
+    {
+        title: 'Compliance by Unit',
+        href: '/kra/evaluations', // Replace with actual route when ready
+        icon: TableProperties,
+    },
+];
+
+const kraNavItems: NavItem[] = [
+    {
+        title: 'KRA 1 · Governance',
+        href: '/kra/governance',
+        icon: Building2,
+    },
+    {
+        title: 'KRA 2 · Research',
+        href: '/kra/research',
+        icon: FlaskConical,
+    },
+    {
+        title: 'KRA 3 · Teaching',
+        href: '/kra/teaching',
+        icon: GraduationCap,
+    },
+    {
+        title: 'KRA 4 · Community',
+        href: '/kra/community',
+        icon: Users,
+    },
+    {
+        title: 'KRA 5 · Students',
+        href: '/kra/students',
+        icon: BookOpenText,
     },
 ];
 
@@ -43,8 +90,15 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                        <SidebarMenuButton
+                            asChild
+                            className="h-auto justify-center py-4"
+                        >
+                            <Link
+                                href={dashboard()}
+                                prefetch
+                                className="w-full justify-center"
+                            >
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -53,7 +107,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                {/* Pass grouped sections into NavMain */}
+                <NavMain
+                    dashboardItems={dashboardNavItems}
+                    kraItems={kraNavItems}
+                />
             </SidebarContent>
 
             <SidebarFooter>

@@ -1,20 +1,19 @@
-import { usePage } from '@inertiajs/react';
-
 import AppLogoIcon from '@/components/app-logo-icon';
 
 export default function AppLogo() {
-    const { name } = usePage().props;
-
     return (
-        <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
+        <div className="flex w-full flex-col items-center text-center">
+            <div className="mb-1 flex h-20 w-20 items-center justify-center rounded-xl text-sidebar-primary-foreground">
+                <AppLogoIcon className="h-14 w-14 fill-current text-white dark:text-black" />
             </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">
-                    Strategic Plan
-                </span>
-            </div>
-        </>
+
+            <h2 className="text-sm leading-tight font-bold">
+                UNIVERSITY OF THE VISAYAS
+            </h2>
+
+            <p className="text-xs text-muted-foreground">Strategic Plan</p>
+
+            {/* <p className="text-xs text-muted-foreground">AY 2026–2027</p> */}
+        </div>
     );
 }
