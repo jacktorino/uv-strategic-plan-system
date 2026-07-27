@@ -71,6 +71,20 @@ const kraNavItems: NavItem[] = [
     },
 ];
 
+const adminNavItems: NavItem[] = [
+    {
+        title: 'Responsible Units',
+        href: '/responsible-units',
+        icon: UserCheck,
+    },
+
+    {
+        title: 'Accounts',
+        href: '/accounts',
+        icon: Users,
+    },
+];
+
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -111,6 +125,7 @@ export function AppSidebar() {
                 <NavMain
                     dashboardItems={dashboardNavItems}
                     kraItems={kraNavItems}
+                    adminItems={adminNavItems}
                 />
             </SidebarContent>
 

@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kras', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique();
-
-            $table->string('name');
-
-            $table->integer('order_no')->default(1);
-            $table->timestamps();
-        });
+       Schema::create('kras', function (Blueprint $table) {
+        $table->id();
+        $table->string('code')->unique();   // e.g. 1.1, 1.2, 2.1
+        $table->string('name');
+        $table->unsignedInteger('order_no')->default(1); // display order
+        $table->timestamps();
+    });
     }
 
     /**

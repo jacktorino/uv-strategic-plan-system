@@ -12,12 +12,16 @@ import type { NavItem } from '@/types';
 interface NavMainProps {
     dashboardItems?: NavItem[];
     kraItems?: NavItem[];
+    adminItems?: NavItem[];
 }
 
-export function NavMain({ dashboardItems = [], kraItems = [] }: NavMainProps) {
+export function NavMain({
+    dashboardItems = [],
+    kraItems = [],
+    adminItems = [],
+}: NavMainProps) {
     const { isCurrentUrl } = useCurrentUrl();
 
-    // Helper class to override shadcn's default gray active state
     const activeClass =
         'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:data-[active=true]:bg-primary/90 hover:data-[active=true]:text-primary-foreground';
 
@@ -53,6 +57,30 @@ export function NavMain({ dashboardItems = [], kraItems = [] }: NavMainProps) {
                     <SidebarGroupLabel>Key Result Areas</SidebarGroupLabel>
                     <SidebarMenu>
                         {kraItems.map((item) => (
+                            <SidebarMenuItem key={item.title}>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isCurrentUrl(item.href)}
+                                    tooltip={{ children: item.title }}
+                                    className={activeClass}
+                                >
+                                    <Link href={item.href} prefetch>
+                                        {item.icon && <item.icon />}
+                                        <span>{item.title}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+            )}
+
+            {/* Admin Section */}
+            {adminItems.length > 0 && (
+                <SidebarGroup className="mt-4 px-2 py-0">
+                    <SidebarGroupLabel>Administration</SidebarGroupLabel>
+                    <SidebarMenu>
+                        {adminItems.map((item) => (
                             <SidebarMenuItem key={item.title}>
                                 <SidebarMenuButton
                                     asChild

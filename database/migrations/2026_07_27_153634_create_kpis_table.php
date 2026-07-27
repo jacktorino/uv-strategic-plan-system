@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('kpis', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('kra_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('code')->unique();      // e.g. 1.1.1
+            $table->text('name');
+       
+
+            $table->unsignedInteger('order_no')->default(1);
+
             $table->timestamps();
         });
     }

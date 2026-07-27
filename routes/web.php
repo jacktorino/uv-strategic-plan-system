@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ResponsibleUnitController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\KRA\CommunityController;
 use App\Http\Controllers\KRA\GovernanceController;
 use App\Http\Controllers\KRA\ResearchController;
@@ -20,5 +22,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/kra/students', [StudentsController::class, 'index'])->name('kra.students');
 });
 
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::resource(
+        'responsible-units',
+        ResponsibleUnitController::class
+    );
+
+        Route::resource(
+        'accounts',
+        UserController::class
+    );
+
+});
 
 require __DIR__.'/settings.php';

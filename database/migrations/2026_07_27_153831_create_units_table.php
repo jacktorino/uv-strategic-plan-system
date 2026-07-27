@@ -13,6 +13,19 @@ return new class extends Migration
     {
         Schema::create('units', function (Blueprint $table) {
             $table->id();
+
+            $table->string('code')->unique();
+            $table->string('name');
+
+            $table->enum('category', [
+                'Academic College',
+                'Administrative Office',
+                'Academic Support Unit',
+                'Satellite Campus',
+            ]);
+
+            $table->unsignedInteger('order_no')->default(1);
+
             $table->timestamps();
         });
     }

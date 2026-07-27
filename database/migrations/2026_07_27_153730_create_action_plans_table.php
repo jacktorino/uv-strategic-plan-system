@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('action_plans', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('kpi_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->text('description');
+
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+
+            $table->unsignedInteger('order_no')->default(1);
+
             $table->timestamps();
         });
     }
