@@ -18,8 +18,9 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            // Fix: Explicitly point 'responsible_unit_id' to the 'units' table
             $table->foreignId('responsible_unit_id')
-                ->constrained()
+                ->constrained('units')
                 ->cascadeOnDelete();
 
             $table->enum('status', [

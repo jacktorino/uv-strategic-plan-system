@@ -13,14 +13,15 @@ class GovernanceController extends Controller
      */
     public function index()
     {
-        return Inertia::render('kra/governance/Index'); // or 'Kra/Index' depending on your naming convention
+        return Inertia::render('kra/governance/Index');
     }
+
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-       
+        //
     }
 
     /**

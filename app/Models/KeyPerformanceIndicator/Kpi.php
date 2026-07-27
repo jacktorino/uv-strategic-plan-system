@@ -2,7 +2,7 @@
 
 namespace App\Models\KeyPerformanceIndicator;
 
-use App\Models\ActionPlan\ActionPlan;
+use App\Models\InnovativeActionPlan\ActionPlan;
 use App\Models\KeyResultArea\Kra;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

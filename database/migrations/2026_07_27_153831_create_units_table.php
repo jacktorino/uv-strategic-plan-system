@@ -18,9 +18,8 @@ return new class extends Migration
             $table->string('name');
 
             $table->enum('category', [
-                'Academic College',
-                'Administrative Office',
-                'Academic Support Unit',
+                'Academic Units',
+                'Non-Academic Units',
                 'Satellite Campus',
             ]);
 

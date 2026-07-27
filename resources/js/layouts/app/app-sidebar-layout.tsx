@@ -2,6 +2,7 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { DemoAccountSwitcher } from '@/components/demo-account-switcher';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppSidebarLayout({
@@ -15,6 +16,9 @@ export default function AppSidebarLayout({
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
             </AppContent>
+
+            {/* Floats in the bottom-right corner across all dashboard pages */}
+            <DemoAccountSwitcher />
         </AppShell>
     );
 }

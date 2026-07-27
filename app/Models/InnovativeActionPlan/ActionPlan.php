@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\ActionPlan;
+namespace App\Models\InnovativeActionPlan;
 
 use App\Models\KeyPerformanceIndicator\Kpi;
 use App\Models\Assignment\ActionPlanAssignment;

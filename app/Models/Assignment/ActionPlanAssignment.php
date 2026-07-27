@@ -2,7 +2,7 @@
 
 namespace App\Models\Assignment;
 
-use App\Models\ActionPlan\ActionPlan;
+use App\Models\InnovativeActionPlan\ActionPlan;
 use App\Models\Proof\ActionPlanProof;
 use App\Models\ResponsibleUnit\Units;
 use App\Models\User;
