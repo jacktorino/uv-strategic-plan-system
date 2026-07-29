@@ -69,24 +69,46 @@ export default function Index({ actionPlans, kpis, units }: IndexProps) {
     const [search, setSearch] = useState('');
 
     const [createOpen, setCreateOpen] = useState(false);
-
     const [editOpen, setEditOpen] = useState(false);
-
     const [deleteOpen, setDeleteOpen] = useState(false);
-
     const [selectedPlan, setSelectedPlan] = useState<ActionPlan | null>(null);
 
     /*
     |--------------------------------------------------------------------------
-    | GROUP ACTION PLANS BY KRA -> KPI -> PLAN
+    | 1. SEARCH FILTER
+    | (This MUST happen before grouping so row spans adjust dynamically)
     |--------------------------------------------------------------------------
     */
+    const filteredPlans = useMemo(() => {
+        if (!search.trim()) return actionPlans;
 
+        const text = search.toLowerCase();
+
+        return actionPlans.filter((plan) => {
+            return (
+                plan.kpi?.code?.toLowerCase().includes(text) ||
+                plan.kpi?.name?.toLowerCase().includes(text) ||
+                plan.description.toLowerCase().includes(text) ||
+                plan.responsible_units.some(
+                    (unit) =>
+                        unit.name.toLowerCase().includes(text) ||
+                        unit.code?.toLowerCase().includes(text),
+                )
+            );
+        });
+    }, [actionPlans, search]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2. GROUP FILTERED ACTION PLANS BY KRA -> KPI -> PLAN
+    |--------------------------------------------------------------------------
+    */
     const tableRows = useMemo(() => {
         const kraOrder: number[] = [];
         const kraMap: Record<number, KraGroup> = {};
 
-        actionPlans.forEach((plan) => {
+        // Use filteredPlans instead of actionPlans
+        filteredPlans.forEach((plan) => {
             if (!plan.kpi) return;
 
             const kraId = plan.kpi.kra ? plan.kpi.kra.id : -1;
@@ -139,32 +161,7 @@ export default function Index({ actionPlans, kpis, units }: IndexProps) {
         });
 
         return rows;
-    }, [actionPlans]);
-
-    /*
-    |--------------------------------------------------------------------------
-    | SEARCH
-    |--------------------------------------------------------------------------
-    */
-
-    const filteredRows = useMemo(() => {
-        if (!search.trim()) return tableRows;
-
-        const text = search.toLowerCase();
-
-        return tableRows.filter((row) => {
-            return (
-                row.kpi.code?.toLowerCase().includes(text) ||
-                row.kpi.name?.toLowerCase().includes(text) ||
-                row.plan.description.toLowerCase().includes(text) ||
-                row.plan.responsible_units.some(
-                    (unit) =>
-                        unit.name.toLowerCase().includes(text) ||
-                        unit.code?.toLowerCase().includes(text),
-                )
-            );
-        });
-    }, [tableRows, search]);
+    }, [filteredPlans]);
 
     function handleEdit(plan: ActionPlan) {
         setSelectedPlan(plan);
@@ -205,7 +202,7 @@ export default function Index({ actionPlans, kpis, units }: IndexProps) {
                     className="max-w-sm"
                 />
 
-                <DataTable columns={tableColumns} data={filteredRows} />
+                <DataTable columns={tableColumns} data={tableRows} />
             </div>
 
             <CreateDialog

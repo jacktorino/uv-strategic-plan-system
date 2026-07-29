@@ -40,7 +40,10 @@ export function DataTable<TData, TValue>({
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
-                                <TableHead key={header.id}>
+                                <TableHead
+                                    key={header.id}
+                                    className="border-r last:border-r-0"
+                                >
                                     {header.isPlaceholder
                                         ? null
                                         : flexRender(
@@ -90,7 +93,7 @@ export function DataTable<TData, TValue>({
                                                 <TableCell
                                                     key={cell.id}
                                                     rowSpan={span}
-                                                    className="align-top"
+                                                    className="border-r align-top"
                                                 >
                                                     {flexRender(
                                                         cell.column.columnDef
@@ -102,7 +105,10 @@ export function DataTable<TData, TValue>({
                                         }
 
                                         return (
-                                            <TableCell key={cell.id}>
+                                            <TableCell
+                                                key={cell.id}
+                                                className="border-r align-top last:border-r-0"
+                                            >
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
                                                     cell.getContext(),

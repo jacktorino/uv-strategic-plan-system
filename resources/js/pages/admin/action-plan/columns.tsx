@@ -133,9 +133,9 @@ export const columns = ({
 
                     {(plan.start_date || plan.end_date) && (
                         <div className="mt-1 text-[10px] text-muted-foreground">
-                            SET: {formatDate(plan.start_date)}
+                            {/* SET: {formatDate(plan.start_date)}
                             {' — '}
-                            DUE: {formatDate(plan.end_date)}
+                            DUE: {formatDate(plan.end_date)} */}
                         </div>
                     )}
                 </div>
@@ -200,7 +200,7 @@ export const columns = ({
                 );
 
             return (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 align-top">
                     {!assignedUnits.length && (
                         <span className="text-xs text-muted-foreground">
                             None

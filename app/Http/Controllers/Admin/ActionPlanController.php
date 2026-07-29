@@ -39,6 +39,7 @@ class ActionPlanController extends Controller
                         'code' => $plan->kpi->code,
                         'name' => $plan->kpi->name,
                         'kra' => $plan->kpi->kra ? [
+                            'id' => $plan->kpi->kra->id, // ✅ Add this line
                             'code' => $plan->kpi->kra->code,
                             'name' => $plan->kpi->kra->name,
                         ] : null,
