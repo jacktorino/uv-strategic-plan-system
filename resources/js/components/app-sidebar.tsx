@@ -12,6 +12,7 @@ import {
     Users,
     UserCheck,
     BookOpenText,
+    ClipboardList,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -46,7 +47,6 @@ export function AppSidebar() {
     | ADMIN
     |--------------------------------------------------------------------------
     */
-
     if (role === 'admin') {
         dashboardNavItems = [
             {
@@ -110,6 +110,11 @@ export function AppSidebar() {
                 href: '/action-plans',
                 icon: CheckCircle2,
             },
+            {
+                title: 'Unit Submissions',
+                href: '/unit-assignments',
+                icon: ClipboardList,
+            },
         ];
     }
 
@@ -118,7 +123,6 @@ export function AppSidebar() {
     | PLANNING OFFICER
     |--------------------------------------------------------------------------
     */
-
     if (role === 'planning_officer') {
         dashboardNavItems = [
             {
@@ -172,6 +176,11 @@ export function AppSidebar() {
                 href: '/action-plans',
                 icon: CheckCircle2,
             },
+            {
+                title: 'Unit Submissions',
+                href: '/unit-assignments',
+                icon: ClipboardList,
+            },
         ];
     }
 
@@ -180,7 +189,6 @@ export function AppSidebar() {
     | KRA INCHARGE
     |--------------------------------------------------------------------------
     */
-
     if (role === 'kra_incharge') {
         dashboardNavItems = [
             {
@@ -190,7 +198,6 @@ export function AppSidebar() {
             },
         ];
 
-        // Later replace these with auth.user.kras
         kraNavItems = [
             {
                 title: 'My KRAs',
@@ -218,7 +225,6 @@ export function AppSidebar() {
     | RESPONSIBLE UNIT
     |--------------------------------------------------------------------------
     */
-
     if (role === 'responsible_unit') {
         dashboardNavItems = [
             {
@@ -230,14 +236,9 @@ export function AppSidebar() {
 
         adminNavItems = [
             {
-                title: 'My KPIs',
-                href: '/kpis',
-                icon: Layers,
-            },
-            {
-                title: 'Action Plans',
-                href: '/action-plans',
-                icon: CheckCircle2,
+                title: 'Unit Assignments',
+                href: '/unit-assignments',
+                icon: ClipboardList,
             },
         ];
     }
@@ -247,7 +248,6 @@ export function AppSidebar() {
     | VIEWER
     |--------------------------------------------------------------------------
     */
-
     if (role === 'viewer') {
         dashboardNavItems = [
             {
@@ -305,8 +305,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link
-                                href={dashboard()}prefetch>
+                            <Link href={dashboard()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

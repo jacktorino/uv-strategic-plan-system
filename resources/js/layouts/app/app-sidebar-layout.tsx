@@ -17,8 +17,8 @@ export default function AppSidebarLayout({
                 {children}
             </AppContent>
 
-            {/* Floats in the bottom-right corner across all dashboard pages */}
-            <DemoAccountSwitcher />
+            {/* Floats in the bottom-right corner across all dashboard pages
+            <DemoAccountSwitcher /> */}
         </AppShell>
     );
 }

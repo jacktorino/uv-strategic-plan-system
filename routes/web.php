@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ActionPlanAssignmentController;
 use App\Http\Controllers\Admin\ActionPlanController;
 use App\Http\Controllers\Admin\KpiController;
 use App\Http\Controllers\Admin\ResponsibleUnitController;
+
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\KRA\CommunityController;
 use App\Http\Controllers\KRA\GovernanceController;
@@ -22,7 +24,7 @@ Route::prefix('demo')->name('demo.')->group(function () {
         return redirect()->route('dashboard');
     })->name('switch');
 
-    // 2. Switch by Role / Type (Convenient if you have specific demo roles)
+    // 2. Switch by Role / Type
     Route::get('/login-as/{role}', function (string $role) {
         $user = User::where('role', $role)->first() ?? User::first();
         if ($user) {
@@ -52,6 +54,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('accounts', UserController::class);
     Route::resource('kpis', KpiController::class);
     Route::resource('action-plans', ActionPlanController::class);
+
+    // --- ASSIGNED UNIT SUBMISSIONS ---
+    Route::get('/unit-assignments', [ActionPlanAssignmentController::class, 'index'])
+        ->name('unit-assignments.index');
+
+    Route::put('/unit-assignments/{assignment}', [ActionPlanAssignmentController::class, 'updateProgress'])
+        ->name('unit-assignments.update-progress');
 });
 
 require __DIR__.'/settings.php';

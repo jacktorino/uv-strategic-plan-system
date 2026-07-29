@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\ActionPlan\UpdateActionPlanRequest;
 use App\Models\InnovativeActionPlan\ActionPlan;
 use App\Models\Assignment\ActionPlanAssignment;
 use App\Models\KeyPerformanceIndicator\Kpi;
-use App\Models\KeyResultArea\Kra; // Adjust namespace if your KRA model location differs
+use App\Models\KeyResultArea\Kra;
 use App\Models\ResponsibleUnit\Units;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -19,7 +19,7 @@ class ActionPlanController extends Controller
     public function index(): Response
     {
         $actionPlans = ActionPlan::with([
-            'kpi:id,kra_id,code,name',
+            'kpi:id,kra_id,code,name,target',
             'kpi.kra:id,code,name',
             'assignments.responsibleUnit:id,name,code,category'
         ])
@@ -33,13 +33,18 @@ class ActionPlanController extends Controller
                     'start_date' => $plan->start_date?->toDateString(),
                     'end_date' => $plan->end_date?->toDateString(),
 
+                    // Action Plan Calculated Progress
+                    'overall_progress' => $plan->overall_progress,
+
                     // KPI information
                     'kpi' => $plan->kpi ? [
                         'id' => $plan->kpi->id,
                         'code' => $plan->kpi->code,
                         'name' => $plan->kpi->name,
+                        'target' => $plan->kpi->target,
+                        'overall_progress' => $plan->kpi->overall_progress,
                         'kra' => $plan->kpi->kra ? [
-                            'id' => $plan->kpi->kra->id, // ✅ Add this line
+                            'id' => $plan->kpi->kra->id,
                             'code' => $plan->kpi->kra->code,
                             'name' => $plan->kpi->kra->name,
                         ] : null,
@@ -49,10 +54,24 @@ class ActionPlanController extends Controller
                         ->pluck('responsible_unit_id')
                         ->values(),
 
+                    // 1. ADDED BACK: Full Unit objects needed by TanStack column rendering
                     'responsible_units' => $plan->assignments
                         ->pluck('responsibleUnit')
                         ->filter()
                         ->values(),
+
+                    // 2. Individual assignment progress breakdown
+                    'assignments' => $plan->assignments->map(function ($assignment) {
+                        return [
+                            'id' => $assignment->id,
+                            'responsible_unit_id' => $assignment->responsible_unit_id,
+                            'unit_code' => $assignment->responsibleUnit?->code,
+                            'unit_name' => $assignment->responsibleUnit?->name,
+                            'progress_percentage' => $assignment->progress_percentage,
+                            'status' => $assignment->status,
+                            'submitted_at' => $assignment->submitted_at,
+                        ];
+                    }),
                 ];
             });
 
@@ -63,9 +82,18 @@ class ActionPlanController extends Controller
                 ->orderBy('order_no')
                 ->get(),
 
-            'kpis' => Kpi::select('id', 'kra_id', 'code', 'name')
-                ->orderBy('order_no')
-                ->get(),
+            'kpis' => Kpi::with('actionPlans.assignments')
+                ->get()
+                ->map(function ($kpi) {
+                    return [
+                        'id' => $kpi->id,
+                        'kra_id' => $kpi->kra_id,
+                        'code' => $kpi->code,
+                        'name' => $kpi->name,
+                        'target' => $kpi->target,
+                        'overall_progress' => $kpi->overall_progress,
+                    ];
+                }),
 
             'units' => Units::select(
                 'id',
@@ -91,6 +119,7 @@ class ActionPlanController extends Controller
             ActionPlanAssignment::create([
                 'action_plan_id' => $actionPlan->id,
                 'responsible_unit_id' => $unitId,
+                'progress_percentage' => 0,
                 'status' => 'Not Submitted',
             ]);
         }
@@ -108,7 +137,6 @@ class ActionPlanController extends Controller
 
         $actionPlan->update($validated);
 
-        // Only touch assignments still "Not Submitted" — preserve submitted/approved/rejected
         $existingUnitIds = $actionPlan->assignments()->pluck('responsible_unit_id')->all();
         $toAdd = array_diff($unitIds, $existingUnitIds);
 
@@ -116,6 +144,7 @@ class ActionPlanController extends Controller
             ActionPlanAssignment::create([
                 'action_plan_id' => $actionPlan->id,
                 'responsible_unit_id' => $unitId,
+                'progress_percentage' => 0,
                 'status' => 'Not Submitted',
             ]);
         }

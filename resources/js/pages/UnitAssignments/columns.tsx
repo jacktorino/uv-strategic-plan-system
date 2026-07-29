@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { ActionPlanRow, UnitOption } from './index';
+import { ActionPlanRow, UnitOption } from './Index';
 
 export interface ResponsibleUnit {
     id: number;
@@ -146,13 +146,6 @@ export const columns = ({
             const plan = row.original.plan;
             const progress = plan.overall_progress ?? 0;
 
-            // let colorClass = 'bg-amber-500';
-            // if (progress >= 100) {
-            //     colorClass = 'bg-emerald-500';
-            // } else if (progress > 0) {
-            //     colorClass = 'bg-blue-500';
-            // }
-
             return (
                 <div className="w-[50px] space-y-1">
                     <div className="flex items-center justify-between text-xs">
@@ -160,12 +153,6 @@ export const columns = ({
                             {progress}%
                         </span>
                     </div>
-                    {/* <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                        <div
-                            className={`h-full transition-all duration-300 ${colorClass}`}
-                            style={{ width: `${Math.min(progress, 100)}%` }}
-                        />
-                    </div> */}
                 </div>
             );
         },
