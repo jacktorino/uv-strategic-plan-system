@@ -2,12 +2,16 @@
 import { useState, useMemo } from 'react';
 import { useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { type DateRange } from 'react-day-picker';
+import { CalendarDays } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
 import {
     Dialog,
     DialogContent,
@@ -23,6 +27,11 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select';
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+} from '@/components/ui/popover';
 
 interface KraOption {
     id: number;
@@ -56,6 +65,21 @@ interface CreateDialogProps {
     units: UnitOption[];
 }
 
+const MONTHS = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+];
+
 export function CreateDialog({
     open,
     onOpenChange,
@@ -74,6 +98,43 @@ export function CreateDialog({
     });
 
     const [assignToAll, setAssignToAll] = useState(false);
+
+    // ── Date range picker state ─────────────────────────────
+    const today = new Date();
+    const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+    const [pickerMonth, setPickerMonth] = useState(today.getMonth());
+    const [pickerYear, setPickerYear] = useState(today.getFullYear());
+
+    const dateRange: DateRange | undefined = useMemo(() => {
+        if (!data.start_date) return undefined;
+        return {
+            from: new Date(data.start_date),
+            to: data.end_date ? new Date(data.end_date) : undefined,
+        };
+    }, [data.start_date, data.end_date]);
+
+    const yearOptions = useMemo(() => {
+        const base = today.getFullYear();
+        return Array.from({ length: 11 }, (_, i) => base - 5 + i);
+    }, [today]);
+
+    function handleDateRangeSelect(range: DateRange | undefined) {
+        setData((prev) => ({
+            ...prev,
+            start_date: range?.from ? format(range.from, 'yyyy-MM-dd') : '',
+            end_date: range?.to ? format(range.to, 'yyyy-MM-dd') : '',
+        }));
+    }
+
+    function applyMonthShortcut() {
+        const from = startOfMonth(new Date(pickerYear, pickerMonth, 1));
+        const to = endOfMonth(from);
+        setData((prev) => ({
+            ...prev,
+            start_date: format(from, 'yyyy-MM-dd'),
+            end_date: format(to, 'yyyy-MM-dd'),
+        }));
+    }
 
     // Filter KPIs based on selected KRA (if a specific KRA is selected)
     const filteredKpis = useMemo(() => {
@@ -461,47 +522,129 @@ export function CreateDialog({
                         </div>
                     </div>
 
-                    {/* SET DATE & DUE DATE SECTION */}
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="space-y-1">
-                            <Label htmlFor="start_date" className="text-xs">
-                                Set Date
+                    {/* SET DATE & DUE DATE SECTION (range picker with month shortcut) */}
+                    <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-xs">
+                                Set Date / Due Date
                             </Label>
-                            <Input
-                                id="start_date"
-                                type="date"
-                                className="h-8 text-xs"
-                                value={data.start_date}
-                                onChange={(e) =>
-                                    setData('start_date', e.target.value)
-                                }
-                            />
-                            {errors.start_date && (
-                                <p className="text-[10px] text-destructive">
-                                    {errors.start_date}
-                                </p>
-                            )}
+                            <Popover
+                                open={datePopoverOpen}
+                                onOpenChange={setDatePopoverOpen}
+                            >
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 text-[11px]"
+                                    >
+                                        <CalendarDays className="mr-1.5 h-3 w-3" />
+                                        Jump to month
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                    align="end"
+                                    className="w-64 space-y-3 p-3"
+                                >
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Select
+                                            value={String(pickerMonth)}
+                                            onValueChange={(v) =>
+                                                setPickerMonth(Number(v))
+                                            }
+                                        >
+                                            <SelectTrigger className="h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {MONTHS.map((m, i) => (
+                                                    <SelectItem
+                                                        key={m}
+                                                        value={String(i)}
+                                                        className="text-xs"
+                                                    >
+                                                        {m}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Select
+                                            value={String(pickerYear)}
+                                            onValueChange={(v) =>
+                                                setPickerYear(Number(v))
+                                            }
+                                        >
+                                            <SelectTrigger className="h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {yearOptions.map((y) => (
+                                                    <SelectItem
+                                                        key={y}
+                                                        value={String(y)}
+                                                        className="text-xs"
+                                                    >
+                                                        {y}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        className="h-8 w-full text-xs"
+                                        onClick={applyMonthShortcut}
+                                    >
+                                        Apply {MONTHS[pickerMonth]} {pickerYear}
+                                    </Button>
+                                </PopoverContent>
+                            </Popover>
                         </div>
 
-                        <div className="space-y-1">
-                            <Label htmlFor="end_date" className="text-xs">
-                                Due Date
-                            </Label>
-                            <Input
-                                id="end_date"
-                                type="date"
-                                className="h-8 text-xs"
-                                value={data.end_date}
-                                onChange={(e) =>
-                                    setData('end_date', e.target.value)
-                                }
-                            />
-                            {errors.end_date && (
-                                <p className="text-[10px] text-destructive">
-                                    {errors.end_date}
-                                </p>
-                            )}
-                        </div>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="h-8 w-full justify-start text-xs font-normal"
+                                >
+                                    {data.start_date
+                                        ? `${format(new Date(data.start_date), 'MMM d, yyyy')}${
+                                              data.end_date
+                                                  ? ` – ${format(new Date(data.end_date), 'MMM d, yyyy')}`
+                                                  : ''
+                                          }`
+                                        : 'Select date range'}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                                align="start"
+                                className="w-auto p-0"
+                            >
+                                <Calendar
+                                    mode="range"
+                                    selected={dateRange}
+                                    onSelect={handleDateRangeSelect}
+                                    month={
+                                        dateRange?.from
+                                            ? new Date(dateRange.from)
+                                            : undefined
+                                    }
+                                    numberOfMonths={2}
+                                    className="rounded-lg border"
+                                />
+                            </PopoverContent>
+                        </Popover>
+
+                        {(errors.start_date || errors.end_date) && (
+                            <p className="text-[10px] text-destructive">
+                                {errors.start_date || errors.end_date}
+                            </p>
+                        )}
                     </div>
 
                     {/* Footer Actions */}

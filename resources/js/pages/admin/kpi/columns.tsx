@@ -26,11 +26,6 @@ interface ColumnsProps {
 export function columns({ onEdit, onDelete }: ColumnsProps): ColumnDef<Kpi>[] {
     return [
         // 1. KRA moved to the very first position
-        {
-            id: 'kra',
-            header: 'Key Result Area',
-            cell: ({ row }) => row.original.kra?.name ?? '—',
-        },
         // 2. Code is now second
         { accessorKey: 'code', header: 'Code' },
         // 3. Name is third
