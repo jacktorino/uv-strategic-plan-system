@@ -25,14 +25,19 @@ interface ColumnsProps {
 
 export function columns({ onEdit, onDelete }: ColumnsProps): ColumnDef<Kpi>[] {
     return [
-        { accessorKey: 'code', header: 'Code' },
-        { accessorKey: 'name', header: 'Name' },
+        // 1. KRA moved to the very first position
         {
             id: 'kra',
-            header: 'KRA',
+            header: 'Key Result Area',
             cell: ({ row }) => row.original.kra?.name ?? '—',
         },
+        // 2. Code is now second
+        { accessorKey: 'code', header: 'Code' },
+        // 3. Name is third
+        { accessorKey: 'name', header: 'Name' },
+        // 4. Order is fourth
         { accessorKey: 'order_no', header: 'Order' },
+        // 5. Actions at the end
         {
             id: 'actions',
             header: '',

@@ -3,15 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\StoreResponsibleUnitRequest;
-use App\Http\Requests\Admin\UpdateResponsibleUnitRequest;
-use App\Http\Requests\StoreResponsibleUnitRequest as RequestsStoreResponsibleUnitRequest;
-use App\Http\Requests\UpdateResponsibleUnitRequest as RequestsUpdateResponsibleUnitRequest;
-use App\Models\ResponsibleUnit;
+use App\Http\Requests\Admin\ResponsibleUnit\StoreResponsibleUnitRequest;
+use App\Http\Requests\Admin\ResponsibleUnit\UpdateResponsibleUnitRequest;
 use App\Models\ResponsibleUnit\Units;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Http\RedirectResponse;
 
 class ResponsibleUnitController extends Controller
 {
@@ -29,37 +26,45 @@ class ResponsibleUnitController extends Controller
         ]);
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(RequestsStoreResponsibleUnitRequest $request): RedirectResponse
+    public function store(StoreResponsibleUnitRequest $request): RedirectResponse
     {
-        Units::create($request->validated());
+        Units::create(
+            $request->validated()
+        );
 
         return redirect()
             ->route('responsible-units.index')
             ->with('success', 'Responsible unit created.');
     }
 
+
     /**
      * Update the specified resource in storage.
      */
     public function update(
-        RequestsUpdateResponsibleUnitRequest $request,
+        UpdateResponsibleUnitRequest $request,
         Units $responsibleUnit
     ): RedirectResponse {
-        $responsibleUnit->update($request->validated());
+        $responsibleUnit->update(
+            $request->validated()
+        );
 
         return redirect()
             ->route('responsible-units.index')
             ->with('success', 'Responsible unit updated.');
     }
 
+
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Units $responsibleUnit): RedirectResponse
-    {
+    public function destroy(
+        Units $responsibleUnit
+    ): RedirectResponse {
         $responsibleUnit->delete();
 
         return redirect()

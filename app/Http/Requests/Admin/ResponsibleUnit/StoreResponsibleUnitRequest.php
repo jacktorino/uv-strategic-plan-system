@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin\ResponsibleUnit;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -32,9 +32,8 @@ class StoreResponsibleUnitRequest extends FormRequest
             'category' => [
                 'required',
                 Rule::in([
-                    'Academic College',
-                    'Administrative Office',
-                    'Academic Support Unit',
+                    'Academic Units',
+                    'Non-Academic Units',
                     'Satellite Campus',
                 ]),
             ],

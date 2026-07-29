@@ -21,7 +21,7 @@ class KpiController extends Controller
 
         return Inertia::render('admin/kpi/index', [
             'kpis' => $kpis,
-            'kras' => Kra::select('id','code', 'name')->orderBy('order_no')->get(),
+            'kras' => Kra::select('id', 'code', 'name')->orderBy('order_no')->get(),
         ]);
     }
 

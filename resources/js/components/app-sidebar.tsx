@@ -63,27 +63,27 @@ export function AppSidebar() {
 
         kraNavItems = [
             {
-                title: 'KRA 1 · Governance',
+                title: 'KRA 1',
                 href: '/kra/governance',
                 icon: Building2,
             },
             {
-                title: 'KRA 2 · Research',
+                title: 'KRA 2',
                 href: '/kra/research',
                 icon: FlaskConical,
             },
             {
-                title: 'KRA 3 · Teaching',
+                title: 'KRA 3',
                 href: '/kra/teaching',
                 icon: GraduationCap,
             },
             {
-                title: 'KRA 4 · Community',
+                title: 'KRA 4',
                 href: '/kra/community',
                 icon: Users,
             },
             {
-                title: 'KRA 5 · Students',
+                title: 'KRA 5',
                 href: '/kra/students',
                 icon: BookOpenText,
             },
@@ -135,27 +135,27 @@ export function AppSidebar() {
 
         kraNavItems = [
             {
-                title: 'KRA 1 · Governance',
+                title: 'KRA 1',
                 href: '/kra/governance',
                 icon: Building2,
             },
             {
-                title: 'KRA 2 · Research',
+                title: 'KRA 2',
                 href: '/kra/research',
                 icon: FlaskConical,
             },
             {
-                title: 'KRA 3 · Teaching',
+                title: 'KRA 3',
                 href: '/kra/teaching',
                 icon: GraduationCap,
             },
             {
-                title: 'KRA 4 · Community',
+                title: 'KRA 4',
                 href: '/kra/community',
                 icon: Users,
             },
             {
-                title: 'KRA 5 · Students',
+                title: 'KRA 5',
                 href: '/kra/students',
                 icon: BookOpenText,
             },
@@ -259,27 +259,27 @@ export function AppSidebar() {
 
         kraNavItems = [
             {
-                title: 'KRA 1 · Governance',
+                title: 'KRA 1',
                 href: '/kra/governance',
                 icon: Building2,
             },
             {
-                title: 'KRA 2 · Research',
+                title: 'KRA 2',
                 href: '/kra/research',
                 icon: FlaskConical,
             },
             {
-                title: 'KRA 3 · Teaching',
+                title: 'KRA 3',
                 href: '/kra/teaching',
                 icon: GraduationCap,
             },
             {
-                title: 'KRA 4 · Community',
+                title: 'KRA 4',
                 href: '/kra/community',
                 icon: Users,
             },
             {
-                title: 'KRA 5 · Students',
+                title: 'KRA 5',
                 href: '/kra/students',
                 icon: BookOpenText,
             },
@@ -304,15 +304,9 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton
-                            asChild
-                            className="h-auto justify-center py-4"
-                        >
+                        <SidebarMenuButton size="lg" asChild>
                             <Link
-                                href={dashboard()}
-                                prefetch
-                                className="w-full justify-center"
-                            >
+                                href={dashboard()}prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

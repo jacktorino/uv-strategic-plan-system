@@ -19,33 +19,60 @@ class ActionPlanController extends Controller
     public function index(): Response
     {
         $actionPlans = ActionPlan::with([
-                'kpi:id,kra_id,code,name', 
-                'kpi.kra:id,code,name', 
-                'assignments.responsibleUnit:id,name,code'
-            ])
+            'kpi:id,kra_id,code,name',
+            'kpi.kra:id,code,name',
+            'assignments.responsibleUnit:id,name,code,category'
+        ])
             ->orderBy('order_no')
             ->get()
-            ->map(fn (ActionPlan $plan) => [
-                'id' => $plan->id,
-                'description' => $plan->description,
-                'start_date' => $plan->start_date?->toDateString(),
-                'end_date' => $plan->end_date?->toDateString(),
-                'order_no' => $plan->order_no,
-                'kpi' => $plan->kpi,
-                'responsible_unit_ids' => $plan->assignments
-                    ->pluck('responsible_unit_id')
-                    ->values(),
-                'assigned_units' => $plan->assignments
-                    ->pluck('responsibleUnit.code')
-                    ->filter()
-                    ->values(),
-            ]);
+            ->map(function (ActionPlan $plan) {
+
+                return [
+                    'id' => $plan->id,
+                    'description' => $plan->description,
+                    'start_date' => $plan->start_date?->toDateString(),
+                    'end_date' => $plan->end_date?->toDateString(),
+
+                    // KPI information
+                    'kpi' => $plan->kpi ? [
+                        'id' => $plan->kpi->id,
+                        'code' => $plan->kpi->code,
+                        'name' => $plan->kpi->name,
+                        'kra' => $plan->kpi->kra ? [
+                            'code' => $plan->kpi->kra->code,
+                            'name' => $plan->kpi->kra->name,
+                        ] : null,
+                    ] : null,
+
+                    'responsible_unit_ids' => $plan->assignments
+                        ->pluck('responsible_unit_id')
+                        ->values(),
+
+                    'responsible_units' => $plan->assignments
+                        ->pluck('responsibleUnit')
+                        ->filter()
+                        ->values(),
+                ];
+            });
 
         return Inertia::render('admin/action-plan/index', [
             'actionPlans' => $actionPlans,
-            'kras' => Kra::select('id', 'code', 'name')->orderBy('order_no')->get(),
-            'kpis' => Kpi::select('id', 'kra_id', 'code', 'name')->orderBy('order_no')->get(),
-            'units' => Units::select('id', 'code', 'name', 'category', 'order_no')
+
+            'kras' => Kra::select('id', 'code', 'name')
+                ->orderBy('order_no')
+                ->get(),
+
+            'kpis' => Kpi::select('id', 'kra_id', 'code', 'name')
+                ->orderBy('order_no')
+                ->get(),
+
+            'units' => Units::select(
+                'id',
+                'code',
+                'name',
+                'category',
+                'order_no'
+            )
                 ->orderBy('order_no')
                 ->get(),
         ]);

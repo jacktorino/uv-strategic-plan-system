@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Admin\ResponsibleUnit;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -22,8 +22,8 @@ class UpdateResponsibleUnitRequest extends FormRequest
                 'required',
                 'string',
                 'max:20',
-                Rule::unique('units')
-                    ->ignore($unit),
+                Rule::unique('units', 'code')
+                    ->ignore($unit?->id),
             ],
 
             'name' => [
@@ -35,9 +35,8 @@ class UpdateResponsibleUnitRequest extends FormRequest
             'category' => [
                 'required',
                 Rule::in([
-                    'Academic College',
-                    'Administrative Office',
-                    'Academic Support Unit',
+                    'Academic Units',
+                    'Non-Academic Units',
                     'Satellite Campus',
                 ]),
             ],

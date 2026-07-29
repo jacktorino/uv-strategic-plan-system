@@ -15,11 +15,6 @@ type KraRow = {
     kpi: string;
     actionPlan: string;
     responsibleUnits: string;
-    targets: {
-        ay2023_2024: string;
-        ay2024_2025: string;
-        ay2025_2026: string;
-    };
     status: string;
 };
 
@@ -32,11 +27,6 @@ const kraData: KraRow[] = [
         actionPlan:
             'Upload the VMO in the website, official social media accounts, and post in the conspicuous places/areas in the University Campuses.',
         responsibleUnits: 'CPAD, QMS, FMD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -46,11 +36,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Upload the PQF Levels 6-8 Descriptors and the UV Institutional Learning Outcomes in the website, official social media accounts, and post in the conspicuous places/areas in the University Campuses.',
         responsibleUnits: 'All Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -60,11 +46,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Integrate in the course syllabi and activities of all programs across campuses, colleges and units.',
         responsibleUnits: 'All Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -74,11 +56,7 @@ const kraData: KraRow[] = [
         actionPlan:
             "Integration in all classes' orientation and recitation in all units' regular meetings.",
         responsibleUnits: 'All Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -88,11 +66,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Upload the 17 UNSDG in the website, official social media accounts, and post in the conspicuous places/areas in the University Campuses.',
         responsibleUnits: 'CPAD, QMS, FMD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -102,11 +76,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Integrate in the course syllabi and activities of all programs across campuses, colleges and units.',
         responsibleUnits: 'All Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -116,11 +86,7 @@ const kraData: KraRow[] = [
         actionPlan:
             "Integration in all classes' orientation and recitation in all units' regular meetings.",
         responsibleUnits: 'All Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -130,11 +96,7 @@ const kraData: KraRow[] = [
         actionPlan:
             "Senior leaders and stakeholders participate actively in the scheduled Quality Assurance Review and Planning towards continuous improvement and stakeholder's satisfaction.",
         responsibleUnits: 'All Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -144,11 +106,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Regularly recognize the valuable contribution of the stakeholders.',
         responsibleUnits: 'All Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -157,11 +115,7 @@ const kraData: KraRow[] = [
         kpi: '1.1.4 Compliance with the National Privacy Commission requirements',
         actionPlan: 'Undertake audit procedures on data privacy',
         responsibleUnits: 'All Academic & Non-Academic Units, DPO',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -171,11 +125,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Implement Awareness Program for employees to improve privacy knowledge, skills, attitude, and behavior.',
         responsibleUnits: 'All Academic & Non-Academic Units, DPO',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -185,11 +135,7 @@ const kraData: KraRow[] = [
         actionPlan:
             "Install much-needed security software's to protect data on all devices used in the University and its satellite campuses.",
         responsibleUnits: 'ICTD, FAD, Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 
@@ -201,11 +147,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Senior Leaders should chair/vice chair/member of at least one (1) university/college committee.',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -215,11 +157,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Ensure continuity of involvement in university committee leaderships memberships by assigning assistants or associates to every senior leader occupying chairmanship positions in various committees.',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -229,11 +167,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Conduct periodic implementation audit of 5S in the different units across all campuses.',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -242,11 +176,7 @@ const kraData: KraRow[] = [
         kpi: '1.2.2 100% involvement in 5S program',
         actionPlan: 'Conduct Capacity-Building for 5S Implementers',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -256,11 +186,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Organize and orient employees on the policies and procedures of the University Quality Circles.',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -270,11 +196,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Deployment of the policies and procedures of the University Quality Circles.',
         responsibleUnits: 'Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 
@@ -286,11 +208,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Conduct training needs assessment as a basis in crafting the learning and development program for non-teaching.',
         responsibleUnits: 'HRD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -300,11 +218,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Attend and complete at least one online training/webinar aligned to the job function.',
         responsibleUnits: 'Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -314,11 +228,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Conduct training assessment as basis crafting of the development program needs in the faculty.',
         responsibleUnits: 'Academic Units, HRD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -328,11 +238,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Attendance to at least one online training or webinar aligned to the field of specialization.',
         responsibleUnits: 'Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -342,11 +248,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Include Faculty Immersion program and have it implemented during Special Period.',
         responsibleUnits: 'Academic Units, HRD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 
@@ -358,11 +260,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Efficient and regular use of corporate emails and online systems in inter-office communication by customizing Office 365 features and applications for a secured and reliable communication process.',
         responsibleUnits: 'CPAD, Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -372,11 +270,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Establish a contingency communication plan with due consideration on security for unexpected challenges.',
         responsibleUnits: 'CPAD, Academic & Non-Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 
@@ -387,11 +281,7 @@ const kraData: KraRow[] = [
         kpi: '1.5.1 100% completion in crafting the 3-year campus development plan.',
         actionPlan: 'Prepare a campus development plan.',
         responsibleUnits: 'FMD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -400,11 +290,6 @@ const kraData: KraRow[] = [
         kpi: '1.5.2 Implementation of the 3-year campus development plan.',
         actionPlan: 'Monitoring of the campus development plan implementation.',
         responsibleUnits: 'FMD',
-        targets: {
-            ay2023_2024: '30%',
-            ay2024_2025: '50%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
 
@@ -416,11 +301,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Maintain regularly an updated website and automation system.',
         responsibleUnits: 'ICTD, CPAD, Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -429,11 +310,6 @@ const kraData: KraRow[] = [
         kpi: '1.6.2 100% improvement of ICT network infrastructure capability',
         actionPlan: 'Maintain regularly an upgraded IT infrastructure.',
         responsibleUnits: 'ICTD, FAD',
-        targets: {
-            ay2023_2024: '50%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -443,11 +319,6 @@ const kraData: KraRow[] = [
         actionPlan:
             "Install much-needed security software's to protect data on all devices used in the University and its satellite campuses.",
         responsibleUnits: 'ICTD, FAD, Academic/Non-Academic Units',
-        targets: {
-            ay2023_2024: '50%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -456,11 +327,6 @@ const kraData: KraRow[] = [
         kpi: '1.6.2 100% improvement of ICT network infrastructure capability',
         actionPlan: 'Host secured systems over the cloud.',
         responsibleUnits: 'ICTD, FAD, Academic/Non-Academic Units',
-        targets: {
-            ay2023_2024: '50%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
 
@@ -471,11 +337,6 @@ const kraData: KraRow[] = [
         kpi: '1.7.1 Increase accounts Receivable collection efficiency to 98%.',
         actionPlan: 'Efficient deployment of cashless payment scheme.',
         responsibleUnits: 'FAD, Academic Units',
-        targets: {
-            ay2023_2024: '95%',
-            ay2024_2025: '98%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -485,11 +346,6 @@ const kraData: KraRow[] = [
         actionPlan:
             "Close monitoring of students' accounts and consistent reminders to students.",
         responsibleUnits: 'FAD',
-        targets: {
-            ay2023_2024: '95%',
-            ay2024_2025: '98%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -499,11 +355,6 @@ const kraData: KraRow[] = [
         actionPlan:
             'Strengthen partnership/linkages with financing intermediaries who could offer educational loans to students.',
         responsibleUnits: 'FAD',
-        targets: {
-            ay2023_2024: '95%',
-            ay2024_2025: '98%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -513,11 +364,6 @@ const kraData: KraRow[] = [
         actionPlan:
             'Integrate the available payment channels in the Enrolment system.',
         responsibleUnits: 'FAD, ICTD',
-        targets: {
-            ay2023_2024: '95%',
-            ay2024_2025: '98%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -527,11 +373,6 @@ const kraData: KraRow[] = [
         actionPlan:
             'Create a University Communication System to update students on their school fees.',
         responsibleUnits: 'FAD, ICTD, Academic Units',
-        targets: {
-            ay2023_2024: '95%',
-            ay2024_2025: '98%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -541,11 +382,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Monitor daily status report of online collections to ensure on time and accurate posting of student online payments.',
         responsibleUnits: 'FAD, ICTD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -555,11 +392,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Monitoring of the actual expenditures versus approved budget.',
         responsibleUnits: 'FAD, Academic & Non-academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -569,11 +402,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Create and integrate the purchasing system to the existing accounting system (Ledgea).',
         responsibleUnits: 'FAD, ICTD',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -583,11 +412,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Submission of weekly Purchase monitoring sheet to track status of request.',
         responsibleUnits: 'FAD, Academic & Non-academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 
@@ -599,11 +424,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Regular review of compliance to standards and submit action plan to address gaps.',
         responsibleUnits: 'QMSO, Quality Circles, Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -613,11 +434,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Regular review of compliance to standards and submit action plan to address gaps.',
         responsibleUnits: 'QMSO, Quality Circles, Academic Units',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -627,25 +444,17 @@ const kraData: KraRow[] = [
         actionPlan:
             'Compliance to standards and submit action plan to address gaps.',
         responsibleUnits: 'All Academic Units, Quality Circles, QMSO',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
         id: 44,
         keyResultArea: '1.8 Accreditation & Certification',
-        kpi: '1.8.4 100% compliance with CHED COD/COE standard',
+        kpi: '1.8.4 100% compliance with CHED COD/COE standard', 
         actionPlan:
             'Regular review of compliance to standards and submit action plan to address gaps.',
         responsibleUnits: 'Academic Units (per college), QMSO, Quality Circles',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -655,11 +464,6 @@ const kraData: KraRow[] = [
         actionPlan:
             'All quality circles to review requirements and submit action plans to address gaps.',
         responsibleUnits: 'Academic Units (per college), QMSO, Quality Circles',
-        targets: {
-            ay2023_2024: '25%',
-            ay2024_2025: '50%',
-            ay2025_2026: '100%',
-        },
         status: '---',
     },
     {
@@ -669,11 +473,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Monitoring, review and evaluation on the compliance to ISO 9001:2015 standards.',
         responsibleUnits: 'QMSO, Academic & Non-Academic Units, DQMR, IQA',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
     {
@@ -683,11 +483,7 @@ const kraData: KraRow[] = [
         actionPlan:
             'Identify, train and capacitate faculty members to take the assessments to qualify with TESDA qualified assessors.',
         responsibleUnits: 'Academic Units (per program)',
-        targets: {
-            ay2023_2024: '100%',
-            ay2024_2025: '100%',
-            ay2025_2026: '100%',
-        },
+        
         status: '---',
     },
 ];

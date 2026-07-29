@@ -1,4 +1,5 @@
-// edit-sheet.tsx
+// resources/js/pages/admin/responsible-unit/edit-sheet.tsx
+
 import { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
@@ -6,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
 import {
     Sheet,
     SheetContent,
@@ -14,6 +16,7 @@ import {
     SheetFooter,
     SheetClose,
 } from '@/components/ui/sheet';
+
 import {
     Select,
     SelectTrigger,
@@ -31,28 +34,50 @@ interface EditSheetProps {
 }
 
 const CATEGORY_OPTIONS = [
-    { value: 'academic_college', label: 'Academic College' },
-    { value: 'administrative_office', label: 'Administrative Office' },
-    { value: 'support_unit', label: 'Support Unit' },
+    {
+        value: 'Academic Units',
+        label: 'Academic Units',
+    },
+    {
+        value: 'Non-Academic Units',
+        label: 'Non-Academic Units',
+    },
+    {
+        value: 'Satellite Campus',
+        label: 'Satellite Campus',
+    },
 ];
 
-export function EditSheet({ open, onOpenChange, unit }: EditSheetProps) {
-    const { data, setData, put, processing, errors, reset } = useForm({
+export function EditSheet({
+    open,
+    onOpenChange,
+    unit,
+}: EditSheetProps) {
+    const {
+        data,
+        setData,
+        put,
+        processing,
+        errors,
+        reset,
+        clearErrors,
+    } = useForm({
         code: '',
         name: '',
         category: '',
         order_no: '',
     });
 
-    // Pre-fill the form whenever a different unit is selected for editing
     useEffect(() => {
         if (unit) {
             setData({
-                code: unit.code,
-                name: unit.name,
-                category: unit.category,
-                order_no: String(unit.order_no),
+                code: unit.code ?? '',
+                name: unit.name ?? '',
+                category: unit.category ?? '',
+                order_no: String(unit.order_no ?? ''),
             });
+
+            clearErrors();
         }
     }, [unit]);
 
@@ -61,36 +86,64 @@ export function EditSheet({ open, onOpenChange, unit }: EditSheetProps) {
 
         if (!unit) return;
 
-        put(`/admin/responsible-units/${unit.id}`, {
+       put(`/responsible-units/${unit.id}`, {
+            preserveScroll: true,
+
             onSuccess: () => {
-                toast.success('Responsible unit updated.');
+                toast.success('Responsible unit updated successfully.');
+
                 reset();
+                clearErrors();
                 onOpenChange(false);
             },
+
             onError: () => {
-                toast.error('Please check the form for errors.');
+                toast.error('Please check the form errors.');
             },
         });
     }
 
+    function handleClose(open: boolean) {
+        if (!open) {
+            reset();
+            clearErrors();
+        }
+
+        onOpenChange(open);
+    }
+
     return (
-        <Sheet open={open} onOpenChange={onOpenChange}>
+        <Sheet open={open} onOpenChange={handleClose}>
             <SheetContent>
-                <form onSubmit={handleSubmit} className="flex h-full flex-col">
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex h-full flex-col"
+                >
                     <SheetHeader>
-                        <SheetTitle>Edit Responsible Unit</SheetTitle>
+                        <SheetTitle>
+                            Edit Responsible Unit
+                        </SheetTitle>
                     </SheetHeader>
 
-                    <div className="flex-1 space-y-4 px-4">
+                    <div className="flex-1 space-y-4 px-4 py-4">
+
+                        {/* Code */}
                         <div className="space-y-2">
-                            <Label htmlFor="edit-code">Code</Label>
+                            <Label htmlFor="edit-code">
+                                Code
+                            </Label>
+
                             <Input
                                 id="edit-code"
                                 value={data.code}
                                 onChange={(e) =>
-                                    setData('code', e.target.value)
+                                    setData(
+                                        'code',
+                                        e.target.value.toUpperCase()
+                                    )
                                 }
                             />
+
                             {errors.code && (
                                 <p className="text-sm text-red-600">
                                     {errors.code}
@@ -98,15 +151,24 @@ export function EditSheet({ open, onOpenChange, unit }: EditSheetProps) {
                             )}
                         </div>
 
+
+                        {/* Name */}
                         <div className="space-y-2">
-                            <Label htmlFor="edit-name">Name</Label>
+                            <Label htmlFor="edit-name">
+                                Name
+                            </Label>
+
                             <Input
                                 id="edit-name"
                                 value={data.name}
                                 onChange={(e) =>
-                                    setData('name', e.target.value)
+                                    setData(
+                                        'name',
+                                        e.target.value
+                                    )
                                 }
                             />
+
                             {errors.name && (
                                 <p className="text-sm text-red-600">
                                     {errors.name}
@@ -114,28 +176,38 @@ export function EditSheet({ open, onOpenChange, unit }: EditSheetProps) {
                             )}
                         </div>
 
+
+                        {/* Category */}
                         <div className="space-y-2">
-                            <Label htmlFor="edit-category">Category</Label>
+                            <Label htmlFor="edit-category">
+                                Category
+                            </Label>
+
                             <Select
                                 value={data.category}
                                 onValueChange={(value) =>
-                                    setData('category', value)
+                                    setData(
+                                        'category',
+                                        value
+                                    )
                                 }
                             >
                                 <SelectTrigger id="edit-category">
                                     <SelectValue placeholder="Select category" />
                                 </SelectTrigger>
+
                                 <SelectContent>
-                                    {CATEGORY_OPTIONS.map((opt) => (
+                                    {CATEGORY_OPTIONS.map((option) => (
                                         <SelectItem
-                                            key={opt.value}
-                                            value={opt.value}
+                                            key={option.value}
+                                            value={option.value}
                                         >
-                                            {opt.label}
+                                            {option.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
+
                             {errors.category && (
                                 <p className="text-sm text-red-600">
                                     {errors.category}
@@ -143,34 +215,55 @@ export function EditSheet({ open, onOpenChange, unit }: EditSheetProps) {
                             )}
                         </div>
 
+
+                        {/* Order */}
                         <div className="space-y-2">
-                            <Label htmlFor="edit-order_no">Order</Label>
+                            <Label htmlFor="edit-order">
+                                Order
+                            </Label>
+
                             <Input
-                                id="edit-order_no"
+                                id="edit-order"
                                 type="number"
                                 value={data.order_no}
                                 onChange={(e) =>
-                                    setData('order_no', e.target.value)
+                                    setData(
+                                        'order_no',
+                                        e.target.value
+                                    )
                                 }
                             />
+
                             {errors.order_no && (
                                 <p className="text-sm text-red-600">
                                     {errors.order_no}
                                 </p>
                             )}
                         </div>
+
                     </div>
 
-                    <SheetFooter>
+
+                    <SheetFooter className="gap-2">
                         <SheetClose asChild>
-                            <Button type="button" variant="outline">
+                            <Button
+                                type="button"
+                                variant="outline"
+                            >
                                 Cancel
                             </Button>
                         </SheetClose>
-                        <Button type="submit" disabled={processing}>
-                            {processing ? 'Saving...' : 'Save Changes'}
+
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                        >
+                            {processing
+                                ? 'Saving...'
+                                : 'Save Changes'}
                         </Button>
                     </SheetFooter>
+
                 </form>
             </SheetContent>
         </Sheet>
