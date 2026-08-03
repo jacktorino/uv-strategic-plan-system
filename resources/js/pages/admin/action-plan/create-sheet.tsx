@@ -267,52 +267,8 @@ export function CreateDialog({
                 <form onSubmit={handleSubmit} className="space-y-3">
                     {/* KRA, KPI, and Order No Row */}
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
-                        {/* KRA Select */}
-                        <div className="space-y-1 sm:col-span-4">
-                            <Label htmlFor="kra_id" className="text-xs">
-                                KRA
-                            </Label>
-                            <Select
-                                value={data.kra_id || 'all'}
-                                onValueChange={(value) => {
-                                    setData((prev) => ({
-                                        ...prev,
-                                        kra_id: value === 'all' ? '' : value,
-                                        kpi_id: '', // Reset KPI selection when KRA changes
-                                    }));
-                                }}
-                            >
-                                <SelectTrigger
-                                    id="kra_id"
-                                    className="h-8 w-full text-xs"
-                                >
-                                    <SelectValue placeholder="All KRAs" />
-                                </SelectTrigger>
-                                <SelectContent className="max-h-60 max-w-[360px] overflow-y-auto">
-                                    <SelectItem value="all" className="text-xs">
-                                        All KRAs
-                                    </SelectItem>
-                                    {kras.map((k) => (
-                                        <SelectItem
-                                            key={k.id}
-                                            value={String(k.id)}
-                                            className="text-xs"
-                                        >
-                                            {k.code ? `${k.code} - ` : ''}
-                                            {k.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {errors.kra_id && (
-                                <p className="text-[10px] text-destructive">
-                                    {errors.kra_id}
-                                </p>
-                            )}
-                        </div>
-
                         {/* KPI Select */}
-                        <div className="space-y-1 sm:col-span-6">
+                        <div className="space-y-1 sm:col-span-10">
                             <Label htmlFor="kpi_id" className="text-xs">
                                 KPI
                             </Label>
@@ -328,7 +284,7 @@ export function CreateDialog({
                                 >
                                     <SelectValue placeholder="Select KPI" />
                                 </SelectTrigger>
-                                <SelectContent className="max-h-60 max-w-[480px] overflow-y-auto">
+                                <SelectContent className="max-w-auto max-h-60 overflow-y-auto">
                                     {filteredKpis.map((k) => (
                                         <SelectItem
                                             key={k.id}

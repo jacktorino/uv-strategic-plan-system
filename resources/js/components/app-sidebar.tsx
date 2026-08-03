@@ -54,11 +54,6 @@ export function AppSidebar() {
                 href: dashboard(),
                 icon: ChartColumnBig,
             },
-            {
-                title: 'Compliance by Unit',
-                href: '/kra/evaluations',
-                icon: TableProperties,
-            },
         ];
 
         kraNavItems = [
@@ -286,18 +281,18 @@ export function AppSidebar() {
         ];
     }
 
-    const footerNavItems: NavItem[] = [
-        {
-            title: 'Repository',
-            href: 'https://github.com/laravel/react-starter-kit',
-            icon: FolderGit2,
-        },
-        {
-            title: 'Documentation',
-            href: 'https://laravel.com/docs/starter-kits#react',
-            icon: BookOpen,
-        },
-    ];
+    // const footerNavItems: NavItem[] = [
+    //     {
+    //         title: 'Repository',
+    //         href: 'https://github.com/laravel/react-starter-kit',
+    //         icon: FolderGit2,
+    //     },
+    //     {
+    //         title: 'Documentation',
+    //         href: 'https://laravel.com/docs/starter-kits#react',
+    //         icon: BookOpen,
+    //     },
+    // ];
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -322,7 +317,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                {/* <NavFooter items={footerNavItems} className="mt-auto" /> */}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -43,6 +43,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
     Route::get('/kra/governance', [GovernanceController::class, 'index'])->name('kra.governance');
+    
     Route::get('/kra/research', [ResearchController::class, 'index'])->name('kra.research');
     Route::get('/kra/teaching', [TeachingController::class, 'index'])->name('kra.teaching');
     Route::get('/kra/community', [CommunityController::class, 'index'])->name('kra.community');

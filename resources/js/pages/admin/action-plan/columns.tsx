@@ -198,29 +198,29 @@ export const columns = ({
     | SUBMISSION MONTH (Derived from start_date or end_date)
     |--------------------------------------------------------------------------
     */
-    {
-        id: 'submission_month',
-        header: 'Start Date — Due Date',
-        cell: ({ row }) => {
-            const plan = row.original.plan;
+    // {
+    //     id: 'submission_month',
+    //     header: 'Start Date — Due Date',
+    //     cell: ({ row }) => {
+    //         const plan = row.original.plan;
 
-            if (!plan.start_date && !plan.end_date) {
-                return (
-                    <span className="text-xs text-muted-foreground">N/A</span>
-                );
-            }
+    //         if (!plan.start_date && !plan.end_date) {
+    //             return (
+    //                 <span className="text-xs text-muted-foreground">N/A</span>
+    //             );
+    //         }
 
-            return (
-                <div className="flex flex-col text-xs">
-                    <div className="text-[11px] text-muted-foreground">
-                        {plan.start_date ? formatDate(plan.start_date) : 'N/A'}
-                        {' — '}
-                        {plan.end_date ? formatDate(plan.end_date) : 'N/A'}
-                    </div>
-                </div>
-            );
-        },
-    },
+    //         return (
+    //             <div className="flex flex-col text-xs">
+    //                 <div className="text-[11px] text-muted-foreground">
+    //                     {plan.start_date ? formatDate(plan.start_date) : 'N/A'}
+    //                     {' — '}
+    //                     {plan.end_date ? formatDate(plan.end_date) : 'N/A'}
+    //                 </div>
+    //             </div>
+    //         );
+    //     },
+    // },
 
     /*
     |--------------------------------------------------------------------------

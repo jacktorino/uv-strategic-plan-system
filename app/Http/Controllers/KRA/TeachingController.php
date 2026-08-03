@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers\KRA;
 
+use App\Http\Controllers\Concerns\TransformsActionPlans;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class TeachingController extends Controller
 {
+       use TransformsActionPlans;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('kra/teaching/Index'); 
+        return Inertia::render('kra/teaching/Index', [
+            'actionPlans' => $this->actionPlansForKraGroup('3.'),
+        ]); 
     }
 
     /**
