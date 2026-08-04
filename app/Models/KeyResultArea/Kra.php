@@ -2,13 +2,13 @@
 
 namespace App\Models\KeyResultArea;
 
-use App\Models\KeyPerfomanceIndicator\Kpi;
+use App\Models\KeyPerformanceIndicator\Kpi;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class kra extends Model
+class Kra extends Model
 {
     protected $fillable = [
         'code',
@@ -21,7 +21,7 @@ class kra extends Model
         return $this->hasMany(Kpi::class);
     }
 
-     public function inCharges(): BelongsToMany
+    public function inCharges(): BelongsToMany
     {
         return $this->belongsToMany(
             User::class,

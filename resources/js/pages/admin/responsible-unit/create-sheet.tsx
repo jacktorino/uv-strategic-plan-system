@@ -27,9 +27,9 @@ interface CreateSheetProps {
 }
 
 const CATEGORY_OPTIONS = [
-    { value: 'academic_college', label: 'Academic College' },
-    { value: 'administrative_office', label: 'Administrative Office' },
-    { value: 'support_unit', label: 'Support Unit' },
+    { value: 'Academic Units', label: 'Academic Units' },
+    { value: 'Non-Academic Units', label: 'Non-Academic Units' },
+    { value: 'Satellite Campus', label: 'Satellite Campus' },
 ];
 
 export function CreateSheet({ open, onOpenChange }: CreateSheetProps) {

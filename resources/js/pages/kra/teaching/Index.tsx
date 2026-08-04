@@ -128,7 +128,7 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
         <>
             <Head title="Governance" />
             <div className="flex h-full w-full max-w-full flex-1 flex-col gap-4 overflow-hidden rounded-xl p-5">
-                <Table className="w-full table-fixed border-collapse border border-border">
+              <Table className="w-full table-fixed border-collapse border border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[12%] whitespace-normal">

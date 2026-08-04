@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table';
 
 import { ActionPlan } from '@/pages/admin/action-plan/columns';
+import { Badge } from '@/components/ui/badge';
 
 interface GovernanceIndexProps {
     actionPlans: ActionPlan[];
@@ -29,7 +30,7 @@ interface DisplayRow {
 
     progress: number;
     description: string;
-    unitsLabel: string;
+    units: string[];
 }
 
 type KpiGroup = {
@@ -94,11 +95,9 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
             const kpiEntry = kraEntry.kpiMap[kpiKey];
 
             kpiEntry.plans.forEach((plan, index) => {
-                const unitsLabel = plan.responsible_units?.length
-                    ? plan.responsible_units
-                          .map((u) => u.code ?? u.name)
-                          .join(', ')
-                    : 'None';
+                const units = plan.responsible_units?.length
+                    ? plan.responsible_units.map((u) => u.code ?? u.name)
+                    : [];
 
                 rows.push({
                     id: plan.id,
@@ -110,7 +109,7 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
                     kpiLabel: kpiEntry.label,
                     progress: plan.overall_progress ?? 0,
                     description: plan.description,
-                    unitsLabel,
+                    units,
                 });
 
                 isFirstInKra = false;
@@ -128,7 +127,7 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
         <>
             <Head title="Governance" />
             <div className="flex h-full w-full max-w-full flex-1 flex-col gap-4 overflow-hidden rounded-xl p-5">
-                <Table className="w-full table-fixed border-collapse border border-border">
+                <Table className="w-full table-fixed border-collapse border border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[12%] whitespace-normal">
@@ -174,7 +173,22 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                                     {row.description}
                                 </TableCell>
                                 <TableCell className="align-top whitespace-normal text-muted-foreground">
-                                    {row.unitsLabel}
+                                    <div className="flex flex-wrap gap-1">
+                                        {row.units.length > 0 ? (
+                                            row.units.map((unit, index) => (
+                                                <Badge
+                                                    key={index}
+                                                    variant="outline"
+                                                >
+                                                    {unit}
+                                                </Badge>
+                                            ))
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">
+                                                None
+                                            </span>
+                                        )}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
