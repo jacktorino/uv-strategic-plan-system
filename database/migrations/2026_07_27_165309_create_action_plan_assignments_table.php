@@ -27,11 +27,11 @@ return new class extends Migration
             $table->unsignedInteger('progress_percentage')->default(0);
 
             $table->enum('status', [
-                'Not Submitted',
+                'Not Yet Submitted',
                 'Submitted',
                 'Approved',
                 'Rejected',
-            ])->default('Not Submitted');
+            ])->default('Not Yet Submitted');
 
             // Submission Information
             $table->timestamp('submitted_at')->nullable();

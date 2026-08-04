@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ResponsibleUnitSeeder::class,
             KraSeeder::class,
+            KpiSeeder::class,
+            ActionPlanSeeder::class,
             UserSeeder::class,
         ]);
     }

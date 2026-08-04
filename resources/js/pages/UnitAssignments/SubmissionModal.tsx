@@ -68,12 +68,7 @@ export default function ActionPlanSubmissionModal({
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Update Progress & Submission</DialogTitle>
-                    <DialogDescription>
-                        {assignment?.action_plan?.title
-                            ? assignment.action_plan.title
-                            : 'Update action plan progress, remarks, or attach proof of accomplishment.'}
-                    </DialogDescription>
+                    <DialogTitle className="text-3xl">Submit</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-2">
@@ -83,9 +78,6 @@ export default function ActionPlanSubmissionModal({
                             <Label htmlFor="progress_percentage">
                                 Progress Percentage (%)
                             </Label>
-                            <span className="text-xs text-muted-foreground">
-                                Select a stage or type exact value
-                            </span>
                         </div>
 
                         {/* Quick-Select Suggestion Chips */}

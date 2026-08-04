@@ -5,14 +5,6 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
 import { AssignmentRow, ActionPlanAssignment } from './Index';
 
 export interface UnitOption {
@@ -49,7 +41,7 @@ export const columns = ({
             const kpi = row.original.kpi;
 
             return (
-                <div className="w-[280px] space-y-1">
+                <div className="w-[120px] space-y-1">
                     {kpi?.kra && (
                         <p className="text-xs leading-snug font-semibold whitespace-normal">
                             {kpi.kra.code} {kpi.kra.name}
@@ -80,9 +72,9 @@ export const columns = ({
                     <p className="mb-10 text-xs leading-snug font-semibold whitespace-normal">
                         {kpi.code ?? '-'} {kpi.name}
                     </p>
-                    <div className="flex items-center gap-2 rounded-2xl border p-2 text-xs">
+                    {/* <div className="flex items-center gap-2 rounded-2xl border p-2 text-xs">
                         KPI Progress: {kpiProgress}%
-                    </div>
+                    </div> */}
                 </div>
             );
         },
@@ -100,23 +92,11 @@ export const columns = ({
             const assignment = row.original.assignment;
             // Explicitly parse and fall back to ensure reactivity catches numeric values
             const progress = Number(assignment.progress_percentage) || 0;
-            const status = assignment.status ?? 'Not Submitted';
+            const status = assignment.status ?? 'Not Yet Submitted';
 
             return (
-                <div className="w-[100px] space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold">{progress}%</span>
-                    </div>
-                    <Badge
-                        variant="secondary"
-                        className={`text-[10px] ${
-                            status === 'Submitted'
-                                ? 'bg-emerald-500/10 text-emerald-600'
-                                : 'bg-amber-500/10 text-amber-600'
-                        }`}
-                    >
-                        {status}
-                    </Badge>
+                <div className="w-[85px] space-y-1">
+                    <span className="font-semibold">{progress}%</span>
                 </div>
             );
         },
@@ -138,6 +118,31 @@ export const columns = ({
                     <p className="text-xs break-words whitespace-normal">
                         {plan?.description}
                     </p>
+                </div>
+            );
+        },
+    },
+
+    {
+        id: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+            const assignment = row.original.assignment;
+            // Explicitly parse and fall back to ensure reactivity catches numeric values
+            const status = assignment.status ?? 'Not Yet Submitted';
+
+            return (
+                <div className="w-[100px] space-y-1">
+                    <Badge
+                        variant="secondary"
+                        className={`text-[10px] ${
+                            status === 'Submitted'
+                                ? 'bg-emerald-500/10 text-emerald-600'
+                                : 'bg-amber-500/10 text-amber-600'
+                        }`}
+                    >
+                        {status}
+                    </Badge>
                 </div>
             );
         },
@@ -207,29 +212,35 @@ export const columns = ({
     */
     {
         id: 'actions',
-        header: '',
+        header: 'Action',
         cell: ({ row }) => {
             const assignment = row.original.assignment;
 
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
+                <Button
+                    variant="default"
+                    onClick={() => onUpdateProgress(assignment)}
+                >
+                    Submit
+                </Button>
+                // <DropdownMenu>
+                //     <DropdownMenuTrigger asChild>
+                //         <Button variant="ghost" className="h-8 w-8 p-0">
+                //             <MoreHorizontal className="h-4 w-4" />
+                //         </Button>
+                //     </DropdownMenuTrigger>
 
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                //     <DropdownMenuContent align="end">
+                //         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        <DropdownMenuItem
-                            onClick={() => onUpdateProgress(assignment)}
-                        >
-                            <UploadCloud className="mr-2 h-4 w-4" />
-                            Update Progress & Submit
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                //         <DropdownMenuItem
+                //             onClick={() => onUpdateProgress(assignment)}
+                //         >
+                //             <UploadCloud className="mr-2 h-4 w-4" />
+
+                //         </DropdownMenuItem>
+                //     </DropdownMenuContent>
+                // </DropdownMenu>
             );
         },
     },

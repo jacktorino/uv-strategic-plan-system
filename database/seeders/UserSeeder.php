@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@uv.edu.ph'],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Testing123!'),
                 'role' => 'admin',
                 'responsible_unit_id' => null,
             ]
@@ -34,7 +34,7 @@ class UserSeeder extends Seeder
             ['email' => 'planning@uv.edu.ph'],
             [
                 'name' => 'Planning Officer',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Testing123!'),
                 'role' => 'planning_officer',
                 'responsible_unit_id' => null,
             ]
@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             ['email' => 'viewer@uv.edu.ph'],
             [
                 'name' => 'System Viewer',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('Testing123!'),
                 'role' => 'viewer',
                 'responsible_unit_id' => null,
             ]
@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
                 ],
                 [
                     'name' => "{$unit->code} Representative",
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('Testing123!'),
                     'role' => 'responsible_unit',
                     'responsible_unit_id' => $unit->id,
                 ]
