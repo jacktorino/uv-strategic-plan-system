@@ -10,7 +10,44 @@ import {
     TableRow,
 } from '@/components/ui/table';
 
-import { ActionPlan } from '@/pages/admin/action-plan/columns';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+import { Badge } from '@/components/ui/badge';
+
+interface UnitInfo {
+    name: string;
+    submitted: boolean;
+    progress_percentage: number;
+}
+
+interface CategoryGroup {
+    category: string;
+    units: UnitInfo[];
+}
+
+export interface ActionPlan {
+    id: number;
+    description: string;
+    overall_progress: number;
+    computedProgress?: number;
+    parsedUnits?: UnitInfo[];
+    kpi?: {
+        id: number;
+        code: string;
+        name: string;
+        kra?: {
+            id: number;
+            code: string;
+            name: string;
+        };
+    };
+    responsible_units?: any[];
+}
 
 interface GovernanceIndexProps {
     actionPlans: ActionPlan[];
@@ -18,23 +55,26 @@ interface GovernanceIndexProps {
 
 interface DisplayRow {
     id: number;
-
     isFirstKra: boolean;
     kraRowSpan: number;
     kraLabel: string;
-
     isFirstKpi: boolean;
     kpiRowSpan: number;
     kpiLabel: string;
-
+    kpiProgress: number;
     progress: number;
     description: string;
-    unitsLabel: string;
+    categoryGroups: CategoryGroup[];
+    ungroupedUnits: UnitInfo[];
 }
 
 type KpiGroup = {
     label: string;
-    plans: ActionPlan[];
+    plans: (ActionPlan & {
+        computedProgress: number;
+        parsedUnits: UnitInfo[];
+    })[];
+    calculatedProgress: number;
 };
 
 type KraGroup = {
@@ -43,14 +83,49 @@ type KraGroup = {
     kpiMap: Record<string, KpiGroup>;
 };
 
-// Groups the flat list of action plans by KRA -> KPI (in the order they
-// first appear) so consecutive rows sharing a KRA/KPI can be merged with
-// rowSpan instead of repeating the text — same approach as the admin list.
 function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
     const kraOrder: string[] = [];
     const kraMap: Record<string, KraGroup> = {};
 
-    actionPlans.forEach((plan) => {
+    // First pass: map and calculate individual plan progress based on responsible units average
+    const processedPlans = actionPlans.map((plan) => {
+        const units: UnitInfo[] = [];
+
+        plan.responsible_units?.forEach((u: any) => {
+            const progressVal = Number(
+                u.progress_percentage ?? u.pivot?.progress_percentage ?? 0,
+            );
+            const isSubmittedExplicit = Boolean(
+                u.submitted || u.pivot?.submitted || false,
+            );
+
+            units.push({
+                name: u.code ?? u.name,
+                submitted: isSubmittedExplicit || progressVal === 100,
+                progress_percentage: progressVal,
+            });
+        });
+
+        // Formula: Action Plan Progress = Sum of units progress / Total units count
+        let calculatedPlanProgress = 0;
+        if (units.length > 0) {
+            const totalUnitsProgress = units.reduce(
+                (sum, unit) => sum + unit.progress_percentage,
+                0,
+            );
+            calculatedPlanProgress = Math.round(
+                totalUnitsProgress / units.length,
+            );
+        }
+
+        return {
+            ...plan,
+            computedProgress: calculatedPlanProgress,
+            parsedUnits: units,
+        };
+    });
+
+    processedPlans.forEach((plan) => {
         if (!plan.kpi) return;
 
         const kra = plan.kpi.kra;
@@ -72,10 +147,30 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
 
         if (!kraEntry.kpiMap[kpiKey]) {
             kraEntry.kpiOrder.push(kpiKey);
-            kraEntry.kpiMap[kpiKey] = { label: kpiLabel, plans: [] };
+            kraEntry.kpiMap[kpiKey] = {
+                label: kpiLabel,
+                plans: [],
+                calculatedProgress: 0,
+            };
         }
 
         kraEntry.kpiMap[kpiKey].plans.push(plan);
+    });
+
+    // Calculate KPI progress (Average of its Action Plans)
+    kraOrder.forEach((kraKey) => {
+        const kraEntry = kraMap[kraKey];
+        kraEntry.kpiOrder.forEach((kpiKey) => {
+            const kpiEntry = kraEntry.kpiMap[kpiKey];
+            const totalPlanProgress = kpiEntry.plans.reduce(
+                (sum, p) => sum + p.computedProgress,
+                0,
+            );
+            kpiEntry.calculatedProgress =
+                kpiEntry.plans.length > 0
+                    ? Math.round(totalPlanProgress / kpiEntry.plans.length)
+                    : 0;
+        });
     });
 
     const rows: DisplayRow[] = [];
@@ -94,11 +189,31 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
             const kpiEntry = kraEntry.kpiMap[kpiKey];
 
             kpiEntry.plans.forEach((plan, index) => {
-                const unitsLabel = plan.responsible_units?.length
-                    ? plan.responsible_units
-                          .map((u) => u.code ?? u.name)
-                          .join(', ')
-                    : 'None';
+                const categoryMap: Record<string, UnitInfo[]> = {};
+
+                plan.parsedUnits.forEach((unit) => {
+                    const originalUnitData = plan.responsible_units?.find(
+                        (u: any) => (u.code ?? u.name) === unit.name,
+                    );
+                    const category =
+                        originalUnitData?.category ?? 'Other Units';
+
+                    if (!categoryMap[category]) {
+                        categoryMap[category] = [];
+                    }
+                    categoryMap[category].push(unit);
+                });
+
+                const categoryGroups: CategoryGroup[] = [];
+                const ungroupedUnits: UnitInfo[] = [];
+
+                Object.entries(categoryMap).forEach(([category, units]) => {
+                    if (units.length <= 3) {
+                        ungroupedUnits.push(...units);
+                    } else {
+                        categoryGroups.push({ category, units });
+                    }
+                });
 
                 rows.push({
                     id: plan.id,
@@ -108,9 +223,11 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
                     isFirstKpi: index === 0,
                     kpiRowSpan: kpiEntry.plans.length,
                     kpiLabel: kpiEntry.label,
-                    progress: plan.overall_progress ?? 0,
+                    kpiProgress: kpiEntry.calculatedProgress,
+                    progress: plan.computedProgress,
                     description: plan.description,
-                    unitsLabel,
+                    categoryGroups,
+                    ungroupedUnits,
                 });
 
                 isFirstInKra = false;
@@ -125,10 +242,10 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
     const rows = useMemo(() => buildRows(actionPlans), [actionPlans]);
 
     return (
-        <>
+        <TooltipProvider>
             <Head title="Governance" />
             <div className="flex h-full w-full max-w-full flex-1 flex-col gap-4 overflow-hidden rounded-xl p-5">
-              <Table className="w-full table-fixed border-collapse border border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border">
+                <Table className="w-full table-fixed border-collapse border border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[12%] whitespace-normal">
@@ -143,7 +260,7 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                             <TableHead className="w-[26%] whitespace-normal">
                                 Innovative Action Plan
                             </TableHead>
-                            <TableHead className="w-[12%] whitespace-normal">
+                            <TableHead className="w-[14%] whitespace-normal">
                                 Responsible Units
                             </TableHead>
                         </TableRow>
@@ -164,7 +281,10 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                                         rowSpan={row.kpiRowSpan}
                                         className="align-top whitespace-normal text-muted-foreground"
                                     >
-                                        {row.kpiLabel}
+                                        <div>{row.kpiLabel}</div>
+                                        <div className="mt-2 text-xs font-semibold text-foreground">
+                                            KPI Progress: {row.kpiProgress}%
+                                        </div>
                                     </TableCell>
                                 )}
                                 <TableCell className="text-center align-top whitespace-normal text-muted-foreground">
@@ -174,7 +294,91 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                                     {row.description}
                                 </TableCell>
                                 <TableCell className="align-top whitespace-normal text-muted-foreground">
-                                    {row.unitsLabel}
+                                    {row.categoryGroups.length > 0 ||
+                                    row.ungroupedUnits.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {row.categoryGroups.map(
+                                                (group, gIdx) => (
+                                                    <Tooltip key={gIdx}>
+                                                        <TooltipTrigger asChild>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="cursor-pointer hover:bg-muted"
+                                                            >
+                                                                {group.category}
+                                                            </Badge>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent
+                                                            side="top"
+                                                            className="w-80 max-w-md border bg-popover p-4 text-popover-foreground shadow-md"
+                                                        >
+                                                            <ul className="space-y-2.5 text-sm">
+                                                                {group.units.map(
+                                                                    (
+                                                                        unit,
+                                                                        uIdx,
+                                                                    ) => (
+                                                                        <li
+                                                                            key={
+                                                                                uIdx
+                                                                            }
+                                                                            className="flex items-center justify-between gap-4"
+                                                                        >
+                                                                            <div className="flex items-center gap-2.5">
+                                                                                <span className="rounded bg-muted/70 px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                                                                                    {
+                                                                                        unit.progress_percentage
+                                                                                    }
+
+                                                                                    %
+                                                                                </span>
+                                                                                <span className="text-foreground">
+                                                                                    {
+                                                                                        unit.name
+                                                                                    }
+                                                                                </span>
+                                                                            </div>
+                                                                            <span
+                                                                                className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
+                                                                                    unit.submitted
+                                                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                                                                        : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                                                                }`}
+                                                                            >
+                                                                                {unit.submitted
+                                                                                    ? 'Submitted'
+                                                                                    : 'Not Submitted'}
+                                                                            </span>
+                                                                        </li>
+                                                                    ),
+                                                                )}
+                                                            </ul>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                ),
+                                            )}
+
+                                            {row.ungroupedUnits.map(
+                                                (unit, uIdx) => (
+                                                    <Badge
+                                                        key={`ungrouped-${uIdx}`}
+                                                        variant="outline"
+                                                        className={`cursor-default ${
+                                                            unit.submitted
+                                                                ? 'border-green-500/35 bg-green-50/50 text-green-700 dark:bg-green-950/20 dark:text-green-400'
+                                                                : 'border-red-500/35 bg-red-50/50 text-red-700 dark:bg-red-950/20 dark:text-red-400'
+                                                        }`}
+                                                    >
+                                                        {unit.name}
+                                                    </Badge>
+                                                ),
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span className="text-xs text-muted-foreground">
+                                            None
+                                        </span>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -192,7 +396,7 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                     </TableBody>
                 </Table>
             </div>
-        </>
+        </TooltipProvider>
     );
 }
 

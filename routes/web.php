@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\ActionPlanAssignmentController;
 use App\Http\Controllers\Admin\ActionPlanController;
 use App\Http\Controllers\Admin\KpiController;
 use App\Http\Controllers\Admin\ResponsibleUnitController;
-
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\KRA\CommunityController;
 use App\Http\Controllers\KRA\GovernanceController;
@@ -60,8 +59,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/unit-assignments', [ActionPlanAssignmentController::class, 'index'])
         ->name('unit-assignments.index');
 
-    Route::put('/unit-assignments/{assignment}', [ActionPlanAssignmentController::class, 'updateProgress'])
-        ->name('unit-assignments.update-progress');
+    Route::post('/unit-assignments/{assignment}/update-progress', [ActionPlanAssignmentController::class, 'updateProgress'])
+    ->name('unit-assignments.update-progress');
 });
 
 require __DIR__.'/settings.php';

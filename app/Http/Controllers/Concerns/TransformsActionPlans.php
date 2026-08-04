@@ -39,10 +39,21 @@ trait TransformsActionPlans
                 ->pluck('responsible_unit_id')
                 ->values(),
 
-            'responsible_units' => $plan->assignments
-                ->pluck('responsibleUnit')
-                ->filter()
-                ->values(),
+            // Mapped to include pivot progress, status, category, and submission check for frontend display
+            'responsible_units' => $plan->assignments->map(function ($assignment) {
+                $unit = $assignment->responsibleUnit;
+                $progress = (int) ($assignment->progress_percentage ?? 0);
+
+                return [
+                    'id' => $unit?->id,
+                    'name' => $unit?->name,
+                    'code' => $unit?->code,
+                    'category' => $unit?->category ?? 'Other Units',
+                    'progress_percentage' => $progress,
+                    'submitted' => ($assignment->status === 'submitted' || !empty($assignment->submitted_at) || $progress === 100),
+                    'status' => $assignment->status ?? 'pending',
+                ];
+            })->filter(fn ($unit) => !is_null($unit['id']))->values(),
 
             'assignments' => $plan->assignments->map(function ($assignment) {
                 return [

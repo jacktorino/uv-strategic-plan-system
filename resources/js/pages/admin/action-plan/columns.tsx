@@ -279,7 +279,7 @@ export const columns = ({
                 );
 
             return (
-                <div className="flex max-w-[220px] flex-wrap gap-1 align-top">
+                <div className="flex max-w-[220px] flex-wrap gap-1 text-center align-top">
                     {!assignedUnits.length && (
                         <span className="text-xs text-muted-foreground">
                             None

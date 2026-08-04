@@ -15,14 +15,18 @@ class ActionPlanAssignment extends Model
     protected $fillable = [
         'action_plan_id',
         'responsible_unit_id',
+        'progress_percentage',
         'status',
         'submitted_at',
+        'submission_remarks',
         'reviewed_by',
         'reviewed_at',
         'remarks',
+        'attachment_path',
     ];
 
     protected $casts = [
+        'progress_percentage' => 'integer',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
     ];

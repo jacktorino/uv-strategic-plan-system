@@ -1,5 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { Badge } from '@/components/ui/badge';
@@ -10,83 +10,39 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { ActionPlanRow, UnitOption } from './Index';
+import { AssignmentRow, ActionPlanAssignment } from './Index';
 
-export interface ResponsibleUnit {
+export interface UnitOption {
     id: number;
     code?: string;
     name: string;
     category?: 'Academic Units' | 'Non-Academic Units' | 'Satellite Campus';
 }
 
-export interface ActionPlanAssignment {
-    id: number;
-    responsible_unit_id: number;
-    unit_code?: string;
-    unit_name?: string;
-    progress_percentage: number;
-    status: 'Not Submitted' | 'Submitted';
-    submitted_at?: string | null;
-}
-
-export interface Kpi {
-    id: number;
-    code?: string;
-    name?: string;
-    target?: number;
-    overall_progress?: number;
-    kra?: {
-        id: number;
-        code?: string;
-        name?: string;
-    };
-}
-
-export interface ActionPlan {
-    id: number;
-    description: string;
-    start_date?: string;
-    end_date?: string;
-    overall_progress?: number;
-    kpi?: Kpi;
-
-    submission_month?: string;
-    responsible_units: ResponsibleUnit[];
-    responsible_unit_ids?: number[];
-    assignments?: ActionPlanAssignment[];
-    order_no?: number | null;
-}
-
-const formatDate = (date?: string) => {
+const formatDate = (date?: string | null) => {
     if (!date) return 'N/A';
     return format(new Date(date), 'MMMM d, yyyy');
 };
 
 interface ColumnProps {
-    allUnits: UnitOption[];
-    onEdit: (plan: ActionPlan) => void;
-    onDelete: (plan: ActionPlan) => void;
+    onUpdateProgress: (assignment: ActionPlanAssignment) => void;
 }
 
 export const columns = ({
-    allUnits,
-    onEdit,
-    onDelete,
-}: ColumnProps): ColumnDef<ActionPlanRow>[] => [
+    onUpdateProgress,
+}: ColumnProps): ColumnDef<AssignmentRow>[] => [
     /*
     |--------------------------------------------------------------------------
-    | KRA (merged across all KPIs/plans that share it)
+    | KRA (Key Result Area - merged based on row span logic)
     |--------------------------------------------------------------------------
     */
     {
         id: 'kra',
-        accessorKey: 'kra',
+        accessorKey: 'kpi.kra',
         header: 'Key Result Area',
-
         cell: ({ row }) => {
             if (!row.original.isFirstKra) return null;
 
@@ -94,7 +50,7 @@ export const columns = ({
 
             return (
                 <div className="w-[280px] space-y-1">
-                    {kpi.kra && (
+                    {kpi?.kra && (
                         <p className="text-xs leading-snug font-semibold whitespace-normal">
                             {kpi.kra.code} {kpi.kra.name}
                         </p>
@@ -106,14 +62,13 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | KPI (merged across all plans under it)
+    | KPI (Key Performance Indicator - merged based on row span logic)
     |--------------------------------------------------------------------------
     */
     {
         id: 'kpi',
         accessorKey: 'kpi',
         header: 'Key Performance Indicator',
-
         cell: ({ row }) => {
             if (!row.original.isFirstKpi) return null;
 
@@ -125,7 +80,7 @@ export const columns = ({
                     <p className="mb-10 text-xs leading-snug font-semibold whitespace-normal">
                         {kpi.code ?? '-'} {kpi.name}
                     </p>
-                    <div className="flex items-center gap-2 rounded-2xl border p-2">
+                    <div className="flex items-center gap-2 rounded-2xl border p-2 text-xs">
                         KPI Progress: {kpiProgress}%
                     </div>
                 </div>
@@ -135,24 +90,33 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | ACTION PLAN PROGRESS
+    | PROGRESS PERCENTAGE & STATUS (Placed directly after KPI column)
     |--------------------------------------------------------------------------
     */
     {
         id: 'progress',
         header: 'Progress',
-
         cell: ({ row }) => {
-            const plan = row.original.plan;
-            const progress = plan.overall_progress ?? 0;
+            const assignment = row.original.assignment;
+            // Explicitly parse and fall back to ensure reactivity catches numeric values
+            const progress = Number(assignment.progress_percentage) || 0;
+            const status = assignment.status ?? 'Not Submitted';
 
             return (
-                <div className="w-[50px] space-y-1">
+                <div className="w-[100px] space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                        <span className="text-[11px] font-semibold">
-                            {progress}%
-                        </span>
+                        <span className="font-semibold">{progress}%</span>
                     </div>
+                    <Badge
+                        variant="secondary"
+                        className={`text-[10px] ${
+                            status === 'Submitted'
+                                ? 'bg-emerald-500/10 text-emerald-600'
+                                : 'bg-amber-500/10 text-amber-600'
+                        }`}
+                    >
+                        {status}
+                    </Badge>
                 </div>
             );
         },
@@ -160,20 +124,19 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | ACTION PLANS
+    | ACTION PLAN DESCRIPTION
     |--------------------------------------------------------------------------
     */
     {
         id: 'plans',
         header: 'Innovative Action Plan',
-
         cell: ({ row }) => {
-            const plan = row.original.plan;
+            const plan = row.original.assignment.action_plan;
 
             return (
-                <div className="w-[400px]">
+                <div className="w-[350px]">
                     <p className="text-xs break-words whitespace-normal">
-                        {plan.description}
+                        {plan?.description}
                     </p>
                 </div>
             );
@@ -182,16 +145,16 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | SUBMISSION MONTH (Derived from start_date or end_date)
+    | TIMELINE (Start Date — End Date)
     |--------------------------------------------------------------------------
     */
     {
-        id: 'submission_month',
+        id: 'timeline',
         header: 'Start Date — Due Date',
         cell: ({ row }) => {
-            const plan = row.original.plan;
+            const plan = row.original.assignment.action_plan;
 
-            if (!plan.start_date && !plan.end_date) {
+            if (!plan?.start_date && !plan?.end_date) {
                 return (
                     <span className="text-xs text-muted-foreground">N/A</span>
                 );
@@ -200,9 +163,9 @@ export const columns = ({
             return (
                 <div className="flex flex-col text-xs">
                     <div className="text-[11px] text-muted-foreground">
-                        {plan.start_date ? formatDate(plan.start_date) : 'N/A'}
+                        {formatDate(plan.start_date)}
                         {' — '}
-                        {plan.end_date ? formatDate(plan.end_date) : 'N/A'}
+                        {formatDate(plan.end_date)}
                     </div>
                 </div>
             );
@@ -211,124 +174,27 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | RESPONSIBLE UNITS
+    | RESPONSIBLE UNIT
     |--------------------------------------------------------------------------
     */
     {
-        id: 'units',
-        header: 'Responsible Units',
-
+        id: 'unit',
+        header: 'Responsible Unit',
         cell: ({ row }) => {
-            const plan = row.original.plan;
+            const assignment = row.original.assignment;
+            const unit = assignment.responsible_unit;
 
-            const assignedUnits = plan.responsible_units ?? [];
-
-            const academicUnits = allUnits.filter(
-                (u) => u.category === 'Academic Units',
-            );
-
-            const nonAcademicUnits = allUnits.filter(
-                (u) => u.category === 'Non-Academic Units',
-            );
-
-            const satelliteUnits = allUnits.filter(
-                (u) => u.category === 'Satellite Campus',
-            );
-
-            const assignedAcademic = assignedUnits.filter(
-                (u) => u.category === 'Academic Units',
-            );
-
-            const assignedNonAcademic = assignedUnits.filter(
-                (u) => u.category === 'Non-Academic Units',
-            );
-
-            const assignedSatellite = assignedUnits.filter(
-                (u) => u.category === 'Satellite Campus',
-            );
-
-            const allAcademicSelected =
-                academicUnits.length > 0 &&
-                academicUnits.every((u) =>
-                    assignedUnits.some((a) => a.id === u.id),
+            if (!unit) {
+                return (
+                    <span className="text-xs text-muted-foreground">None</span>
                 );
-
-            const allNonAcademicSelected =
-                nonAcademicUnits.length > 0 &&
-                nonAcademicUnits.every((u) =>
-                    assignedUnits.some((a) => a.id === u.id),
-                );
-
-            const allSatelliteSelected =
-                satelliteUnits.length > 0 &&
-                satelliteUnits.every((u) =>
-                    assignedUnits.some((a) => a.id === u.id),
-                );
+            }
 
             return (
-                <div className="flex max-w-[220px] flex-wrap gap-1 align-top">
-                    {!assignedUnits.length && (
-                        <span className="text-xs text-muted-foreground">
-                            None
-                        </span>
-                    )}
-
-                    {allAcademicSelected ? (
-                        <Badge
-                            variant="secondary"
-                            className="bg-emerald-500/10 text-[10px] text-emerald-600"
-                        >
-                            Academic Units
-                        </Badge>
-                    ) : (
-                        assignedAcademic.map((unit) => (
-                            <Badge
-                                key={unit.id}
-                                variant="outline"
-                                className="text-[10px]"
-                            >
-                                {unit.code ?? unit.name}
-                            </Badge>
-                        ))
-                    )}
-
-                    {allNonAcademicSelected ? (
-                        <Badge
-                            variant="secondary"
-                            className="bg-blue-500/10 text-[10px] text-blue-600"
-                        >
-                            Non-Academic Units
-                        </Badge>
-                    ) : (
-                        assignedNonAcademic.map((unit) => (
-                            <Badge
-                                key={unit.id}
-                                variant="outline"
-                                className="text-[10px]"
-                            >
-                                {unit.code ?? unit.name}
-                            </Badge>
-                        ))
-                    )}
-
-                    {allSatelliteSelected ? (
-                        <Badge
-                            variant="secondary"
-                            className="bg-amber-500/10 text-[10px] text-amber-600"
-                        >
-                            Satellite Campus
-                        </Badge>
-                    ) : (
-                        assignedSatellite.map((unit) => (
-                            <Badge
-                                key={unit.id}
-                                variant="outline"
-                                className="text-[10px]"
-                            >
-                                {unit.code ?? unit.name}
-                            </Badge>
-                        ))
-                    )}
+                <div className="flex max-w-[180px] flex-wrap gap-1">
+                    <Badge variant="outline" className="text-[10px]">
+                        {unit.code ?? unit.name}
+                    </Badge>
                 </div>
             );
         },
@@ -336,15 +202,14 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | ACTIONS
+    | ACTIONS (Update Progress / Submission)
     |--------------------------------------------------------------------------
     */
     {
         id: 'actions',
         header: '',
-
         cell: ({ row }) => {
-            const plan = row.original.plan;
+            const assignment = row.original.assignment;
 
             return (
                 <DropdownMenu>
@@ -357,19 +222,11 @@ export const columns = ({
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                        <DropdownMenuItem onClick={() => onEdit(plan)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator />
-
                         <DropdownMenuItem
-                            onClick={() => onDelete(plan)}
-                            className="text-destructive"
+                            onClick={() => onUpdateProgress(assignment)}
                         >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            Update Progress & Submit
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

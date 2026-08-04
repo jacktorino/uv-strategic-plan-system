@@ -18,10 +18,13 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            // Fix: Explicitly point 'responsible_unit_id' to the 'units' table
+            // Explicitly point 'responsible_unit_id' to the 'units' table
             $table->foreignId('responsible_unit_id')
                 ->constrained('units')
                 ->cascadeOnDelete();
+
+            // Missing progress column added here
+            $table->unsignedInteger('progress_percentage')->default(0);
 
             $table->enum('status', [
                 'Not Submitted',

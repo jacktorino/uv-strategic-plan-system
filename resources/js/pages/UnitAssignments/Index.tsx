@@ -24,6 +24,7 @@ export interface ActionPlanAssignment {
             id: number;
             code?: string;
             name: string;
+            overall_progress?: number;
             kra?: {
                 id: number;
                 code?: string;
@@ -35,6 +36,7 @@ export interface ActionPlanAssignment {
         id: number;
         code?: string;
         name: string;
+        category?: 'Academic Units' | 'Non-Academic Units' | 'Satellite Campus';
     };
 }
 
@@ -103,11 +105,14 @@ export default function Index({ assignments = [] }: IndexProps) {
         return rawAssignments.filter((item) => {
             const plan = item.action_plan;
             const kpi = plan?.kpi;
+            const kra = kpi?.kra;
             const unit = item.responsible_unit;
 
             return (
                 kpi?.code?.toLowerCase().includes(text) ||
                 kpi?.name?.toLowerCase().includes(text) ||
+                kra?.code?.toLowerCase().includes(text) ||
+                kra?.name?.toLowerCase().includes(text) ||
                 plan?.description?.toLowerCase().includes(text) ||
                 unit?.name?.toLowerCase().includes(text) ||
                 unit?.code?.toLowerCase().includes(text) ||
@@ -122,7 +127,8 @@ export default function Index({ assignments = [] }: IndexProps) {
     |--------------------------------------------------------------------------
     */
     const tableRows = useMemo(() => {
-        if (!rawAssignments || !Array.isArray(rawAssignments)) return [];
+        if (!filteredAssignments || !Array.isArray(filteredAssignments))
+            return [];
 
         const dateOrder: string[] = [];
         const dateMap: Record<
@@ -132,7 +138,7 @@ export default function Index({ assignments = [] }: IndexProps) {
 
         filteredAssignments.forEach((assignment) => {
             const plan = assignment.action_plan;
-            if (!plan || !plan.kpi) return;
+            if (!plan) return;
 
             const targetDate = plan.start_date || plan.end_date;
             const dateKey = targetDate
@@ -145,7 +151,7 @@ export default function Index({ assignments = [] }: IndexProps) {
             }
 
             const dateEntry = dateMap[dateKey];
-            const kraId = plan.kpi.kra ? plan.kpi.kra.id : -1;
+            const kraId = plan.kpi?.kra ? plan.kpi.kra.id : -1;
 
             if (!dateEntry.kraMap[kraId]) {
                 dateEntry.kraOrder.push(kraId);
@@ -153,16 +159,17 @@ export default function Index({ assignments = [] }: IndexProps) {
             }
 
             const kraEntry = dateEntry.kraMap[kraId];
+            const kpiId = plan.kpi ? plan.kpi.id : -999;
 
-            if (!kraEntry.kpiMap[plan.kpi.id]) {
-                kraEntry.kpiOrder.push(plan.kpi.id);
-                kraEntry.kpiMap[plan.kpi.id] = {
-                    kpi: plan.kpi,
+            if (!kraEntry.kpiMap[kpiId]) {
+                kraEntry.kpiOrder.push(kpiId);
+                kraEntry.kpiMap[kpiId] = {
+                    kpi: plan.kpi ?? { id: -999, name: 'Unassigned KPI' },
                     assignments: [],
                 };
             }
 
-            kraEntry.kpiMap[plan.kpi.id].assignments.push(assignment);
+            kraEntry.kpiMap[kpiId].assignments.push(assignment);
         });
 
         const rows: AssignmentRow[] = [];
@@ -215,7 +222,7 @@ export default function Index({ assignments = [] }: IndexProps) {
         });
 
         return rows;
-    }, [filteredAssignments, rawAssignments]);
+    }, [filteredAssignments]);
 
     function handleOpenModal(assignment: ActionPlanAssignment) {
         setSelectedAssignment(assignment);
@@ -250,7 +257,7 @@ export default function Index({ assignments = [] }: IndexProps) {
 
                 <div className="flex items-center justify-between">
                     <Input
-                        placeholder="Search KPI, action plan, status..."
+                        placeholder="Search KRA, KPI, action plan, status..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="max-w-sm"

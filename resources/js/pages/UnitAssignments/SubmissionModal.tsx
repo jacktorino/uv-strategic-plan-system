@@ -21,6 +21,8 @@ interface Props {
     onClose: () => void;
 }
 
+const PRESET_PERCENTAGES = [0, 25, 50, 75, 100];
+
 export default function ActionPlanSubmissionModal({
     assignment,
     isOpen,
@@ -28,13 +30,11 @@ export default function ActionPlanSubmissionModal({
 }: Props) {
     const { data, setData, post, processing, errors, reset, clearErrors } =
         useForm<{
-            _method: string;
-            progress_percentage: number;
+            progress_percentage: number | '';
             submission_remarks: string;
             attachment: File | null;
         }>({
-            _method: 'PUT',
-            progress_percentage: 0,
+            progress_percentage: '',
             submission_remarks: '',
             attachment: null,
         });
@@ -42,8 +42,7 @@ export default function ActionPlanSubmissionModal({
     useEffect(() => {
         if (assignment && isOpen) {
             setData({
-                _method: 'PUT',
-                progress_percentage: assignment.progress_percentage ?? 0,
+                progress_percentage: assignment.progress_percentage ?? '',
                 submission_remarks: assignment.submission_remarks ?? '',
                 attachment: null,
             });
@@ -56,8 +55,7 @@ export default function ActionPlanSubmissionModal({
 
         if (!assignment) return;
 
-        // Post request with method spoofing for multipart/form-data upload
-        post(`/action-plan-assignments/${assignment.id}`, {
+        post(`/unit-assignments/${assignment.id}/update-progress`, {
             preserveScroll: true,
             onSuccess: () => {
                 reset();
@@ -79,21 +77,59 @@ export default function ActionPlanSubmissionModal({
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-2">
-                    {/* Progress Percentage */}
+                    {/* Progress Percentage with Quick Recommendations */}
                     <div className="space-y-2">
-                        <Label htmlFor="progress_percentage">
-                            Progress Percentage (%)
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="progress_percentage">
+                                Progress Percentage (%)
+                            </Label>
+                            <span className="text-xs text-muted-foreground">
+                                Select a stage or type exact value
+                            </span>
+                        </div>
+
+                        {/* Quick-Select Suggestion Chips */}
+                        <div className="flex flex-wrap gap-1.5">
+                            {PRESET_PERCENTAGES.map((pct) => {
+                                const isSelected =
+                                    data.progress_percentage === pct;
+                                return (
+                                    <button
+                                        key={pct}
+                                        type="button"
+                                        onClick={() =>
+                                            setData('progress_percentage', pct)
+                                        }
+                                        className={`rounded-md border px-3 py-1 text-xs font-medium transition-colors ${
+                                            isSelected
+                                                ? 'border-primary bg-primary text-primary-foreground'
+                                                : 'border-input bg-background text-muted-foreground hover:bg-muted'
+                                        }`}
+                                    >
+                                        {pct}%{' '}
+                                        {pct === 0
+                                            ? '(Not Started)'
+                                            : pct === 100
+                                              ? '(Completed)'
+                                              : ''}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
                         <Input
                             id="progress_percentage"
                             type="number"
                             min={0}
                             max={100}
+                            placeholder="e.g. 50"
                             value={data.progress_percentage}
                             onChange={(e) =>
                                 setData(
                                     'progress_percentage',
-                                    Number(e.target.value),
+                                    e.target.value === ''
+                                        ? ''
+                                        : Number(e.target.value),
                                 )
                             }
                             required
