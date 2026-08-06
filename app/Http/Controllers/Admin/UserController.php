@@ -20,8 +20,10 @@ class UserController extends Controller
 {
     protected array $roles = [
         ['value' => 'admin', 'label' => 'Admin'],
-        ['value' => 'staff', 'label' => 'Staff'],
-        ['value' => 'unit_head', 'label' => 'Unit Head'],
+        ['value' => 'planning_officer', 'label' => 'Planning Officer'],
+        ['value' => 'kra_incharge', 'label' => 'Kra Champion'],
+        ['value' => 'subkra_incharge', 'label' => 'SubKra In-charge'],
+        ['value' => 'viewer', 'label' => 'Viewer'],
     ];
 
     public function index(): Response

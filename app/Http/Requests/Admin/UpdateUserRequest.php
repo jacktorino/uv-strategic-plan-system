@@ -22,8 +22,8 @@ class UpdateUserRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->route('user')),
             ],
-            'role' => ['required', 'string', 'in:admin,staff,unit_head'],
-            'responsible_unit_id' => ['required', 'exists:units,id'],
+            'role' => ['required', 'string', 'in:admin,planning_officer,kra_incharge,subkra_incharge,viewer'],
+            
         ];
     }
 }

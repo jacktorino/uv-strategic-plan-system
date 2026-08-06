@@ -10,6 +10,7 @@ export type User = {
         | 'admin'
         | 'planning_officer'
         | 'kra_incharge'
+        | 'subkra_incharge' // Add this here
         | 'responsible_unit'
         | 'viewer';
 

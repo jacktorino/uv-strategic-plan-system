@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Head } from '@inertiajs/react';
+import { format } from 'date-fns';
 
 import {
     Table,
@@ -30,12 +31,22 @@ interface CategoryGroup {
     units: UnitInfo[];
 }
 
+interface PeriodInfo {
+    id: number;
+    month: number;
+    year: number;
+    period_start?: string | null;
+    period_end?: string | null;
+    status: string;
+}
+
 export interface ActionPlan {
     id: number;
     description: string;
     overall_progress: number;
     computedProgress?: number;
     parsedUnits?: UnitInfo[];
+    period?: PeriodInfo | null;
     kpi?: {
         id: number;
         code: string;
@@ -81,6 +92,11 @@ type KraGroup = {
     label: string;
     kpiOrder: string[];
     kpiMap: Record<string, KpiGroup>;
+};
+
+const formatDate = (date?: string | null) => {
+    if (!date) return 'N/A';
+    return format(new Date(date), 'MMMM d, yyyy');
 };
 
 function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
@@ -241,10 +257,47 @@ function buildRows(actionPlans: ActionPlan[]): DisplayRow[] {
 export default function Index({ actionPlans }: GovernanceIndexProps) {
     const rows = useMemo(() => buildRows(actionPlans), [actionPlans]);
 
+    // All plans on this page share the same current reporting period, so
+    // one representative period (the first one present) is shown above
+    // the table rather than repeating it per row.
+    const currentPeriod = useMemo(() => {
+        return actionPlans.find((plan) => plan.period)?.period ?? null;
+    }, [actionPlans]);
+
     return (
         <TooltipProvider>
             <Head title="Governance" />
             <div className="flex h-full w-full max-w-full flex-1 flex-col gap-4 overflow-hidden rounded-xl p-5">
+                {/* Reporting period banner — sits above the table, not inside it */}
+                <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
+                    <div>
+                        <p className="text-sm font-semibold">
+                            {currentPeriod
+                                ? format(
+                                      new Date(
+                                          currentPeriod.year,
+                                          currentPeriod.month - 1,
+                                      ),
+                                      'MMMM yyyy',
+                                  )
+                                : 'Unscheduled'}
+                        </p>
+                        {currentPeriod && (
+                            <p className="text-xs text-muted-foreground">
+                                {formatDate(currentPeriod.period_start)}
+                                {' — '}
+                                {formatDate(currentPeriod.period_end)}
+                            </p>
+                        )}
+                    </div>
+
+                    {currentPeriod && (
+                        <Badge variant="outline" className="text-[10px]">
+                            {currentPeriod.status}
+                        </Badge>
+                    )}
+                </div>
+
                 <Table className="w-full table-fixed border-collapse border border-border [&_td]:border [&_td]:border-border [&_th]:border [&_th]:border-border">
                     <TableHeader>
                         <TableRow>
@@ -325,13 +378,6 @@ export default function Index({ actionPlans }: GovernanceIndexProps) {
                                                                             className="flex items-center justify-between gap-4"
                                                                         >
                                                                             <div className="flex items-center gap-2.5">
-                                                                                <span className="rounded bg-muted/70 px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-                                                                                    {
-                                                                                        unit.progress_percentage
-                                                                                    }
-
-                                                                                    %
-                                                                                </span>
                                                                                 <span className="text-foreground">
                                                                                     {
                                                                                         unit.name

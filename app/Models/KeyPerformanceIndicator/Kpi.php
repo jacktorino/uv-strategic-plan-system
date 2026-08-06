@@ -28,23 +28,22 @@ class Kpi extends Model
     }
 
     /**
-     * Calculate KPI progress in real time.
+     * KPI progress, averaged across its action plans' overall_progress.
      */
-    public function getProgressAttribute(): float
+    public function getOverallProgressAttribute(): float
     {
-        $total = 0;
-        $approved = 0;
+        $actionPlans = $this->actionPlans;
 
-        foreach ($this->actionPlans as $actionPlan) {
-            $total += $actionPlan->assignments()->count();
+        $total = $actionPlans->count();
 
-            $approved += $actionPlan->assignments()
-                ->where('status', 'Approved')
-                ->count();
+        if ($total === 0) {
+            return 0;
         }
 
-        return $total > 0
-            ? round(($approved / $total) * 100, 2)
-            : 0;
+        $sum = $actionPlans->sum(
+            fn (ActionPlan $actionPlan) => $actionPlan->overall_progress
+        );
+
+        return round($sum / $total, 2);
     }
 }

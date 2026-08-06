@@ -2,25 +2,20 @@
 
 namespace App\Models\InnovativeActionPlan;
 
-use App\Models\KeyPerformanceIndicator\Kpi;
+use App\Models\ActionPlanPeriod;
 use App\Models\Assignment\ActionPlanAssignment;
+use App\Models\KeyPerformanceIndicator\Kpi;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ActionPlan extends Model
 {
     protected $fillable = [
         'kpi_id',
         'description',
-        'start_date',
-        'end_date',
         'order_no',
-    ];
-
-    protected $casts = [
-        'start_date' => 'date',
-        'end_date' => 'date',
     ];
 
     public function kpi(): BelongsTo
@@ -34,18 +29,36 @@ class ActionPlan extends Model
     }
 
     /**
-     * Real-time progress.
+     * Monthly reporting periods.
      */
-    public function getProgressAttribute(): float
+    public function periods(): HasMany
+    {
+        return $this->hasMany(ActionPlanPeriod::class);
+    }
+
+    /**
+     * Current month's reporting period.
+     */
+    public function currentPeriod(): HasOne
+    {
+        return $this->hasOne(ActionPlanPeriod::class)
+            ->where('month', now()->month)
+            ->where('year', now()->year);
+    }
+
+    /**
+     * Overall progress, averaged across each assignment's progress_percentage.
+     */
+    public function getOverallProgressAttribute(): float
     {
         $total = $this->assignments()->count();
 
-        $approved = $this->assignments()
-            ->where('status', 'Approved')
-            ->count();
+        if ($total === 0) {
+            return 0;
+        }
 
-        return $total > 0
-            ? round(($approved / $total) * 100, 2)
-            : 0;
+        $sum = $this->assignments()->sum('progress_percentage');
+
+        return round($sum / $total, 2);
     }
 }

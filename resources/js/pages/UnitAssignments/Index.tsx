@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 
 import { DataTable } from '@/components/data-table';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 import { columns } from './columns';
 import ActionPlanSubmissionModal from './SubmissionModal';
@@ -14,6 +15,19 @@ export interface ActionPlanAssignment {
     submission_remarks?: string | null;
     status: string;
     submitted_at?: string | null;
+    period?: {
+        id: number;
+        month: number;
+        year: number;
+        period_start?: string | null;
+        period_end?: string | null;
+        submission_start?: string | null;
+        submission_deadline?: string | null;
+        review_start?: string | null;
+        review_end?: string | null;
+        approval_date?: string | null;
+        status: string;
+    } | null;
     action_plan: {
         id: number;
         title?: string;
@@ -54,9 +68,6 @@ interface IndexProps {
 export interface AssignmentRow {
     id: number;
 
-    isFirstMonth: boolean;
-    monthRowSpan: number;
-
     isFirstKpi: boolean;
     kpiRowSpan: number;
 
@@ -76,6 +87,17 @@ type KpiGroup = {
 type KraGroup = {
     kpiOrder: number[];
     kpiMap: Record<number, KpiGroup>;
+};
+
+interface PeriodBlock {
+    key: string;
+    period: ActionPlanAssignment['period'];
+    rows: AssignmentRow[];
+}
+
+const formatDate = (date?: string | null) => {
+    if (!date) return 'N/A';
+    return format(new Date(date), 'MMMM d, yyyy');
 };
 
 export default function Index({ assignments = [] }: IndexProps) {
@@ -123,42 +145,47 @@ export default function Index({ assignments = [] }: IndexProps) {
 
     /*
     |--------------------------------------------------------------------------
-    | 2. GROUP FILTERED ASSIGNMENTS BY DATE -> KRA -> KPI -> ASSIGNMENT
+    | 2. GROUP FILTERED ASSIGNMENTS BY PERIOD -> KRA -> KPI -> ASSIGNMENT
+    |    Each period becomes its own block, rendered as a heading + table.
     |--------------------------------------------------------------------------
     */
-    const tableRows = useMemo(() => {
+    const periodBlocks = useMemo(() => {
         if (!filteredAssignments || !Array.isArray(filteredAssignments))
             return [];
 
-        const dateOrder: string[] = [];
-        const dateMap: Record<
+        const periodOrder: string[] = [];
+        const periodMap: Record<
             string,
-            { kraOrder: number[]; kraMap: Record<number, KraGroup> }
+            {
+                period: ActionPlanAssignment['period'];
+                kraOrder: number[];
+                kraMap: Record<number, KraGroup>;
+            }
         > = {};
 
         filteredAssignments.forEach((assignment) => {
             const plan = assignment.action_plan;
             if (!plan) return;
 
-            const targetDate = plan.start_date || plan.end_date;
-            const dateKey = targetDate
-                ? format(new Date(targetDate), 'yyyy-MM-dd')
-                : 'Unscheduled';
+            const period = assignment.period ?? null;
+            const periodKey = period
+                ? `${period.year}-${String(period.month).padStart(2, '0')}`
+                : 'unscheduled';
 
-            if (!dateMap[dateKey]) {
-                dateOrder.push(dateKey);
-                dateMap[dateKey] = { kraOrder: [], kraMap: {} };
+            if (!periodMap[periodKey]) {
+                periodOrder.push(periodKey);
+                periodMap[periodKey] = { period, kraOrder: [], kraMap: {} };
             }
 
-            const dateEntry = dateMap[dateKey];
+            const periodEntry = periodMap[periodKey];
             const kraId = plan.kpi?.kra ? plan.kpi.kra.id : -1;
 
-            if (!dateEntry.kraMap[kraId]) {
-                dateEntry.kraOrder.push(kraId);
-                dateEntry.kraMap[kraId] = { kpiOrder: [], kpiMap: {} };
+            if (!periodEntry.kraMap[kraId]) {
+                periodEntry.kraOrder.push(kraId);
+                periodEntry.kraMap[kraId] = { kpiOrder: [], kpiMap: {} };
             }
 
-            const kraEntry = dateEntry.kraMap[kraId];
+            const kraEntry = periodEntry.kraMap[kraId];
             const kpiId = plan.kpi ? plan.kpi.id : -999;
 
             if (!kraEntry.kpiMap[kpiId]) {
@@ -172,24 +199,12 @@ export default function Index({ assignments = [] }: IndexProps) {
             kraEntry.kpiMap[kpiId].assignments.push(assignment);
         });
 
-        const rows: AssignmentRow[] = [];
+        const blocks: PeriodBlock[] = periodOrder.map((periodKey) => {
+            const periodEntry = periodMap[periodKey];
+            const rows: AssignmentRow[] = [];
 
-        dateOrder.forEach((dateKey) => {
-            const dateEntry = dateMap[dateKey];
-            let dateTotalRows = 0;
-
-            dateEntry.kraOrder.forEach((kraId) => {
-                dateEntry.kraMap[kraId].kpiOrder.forEach((kpiId) => {
-                    dateTotalRows +=
-                        dateEntry.kraMap[kraId].kpiMap[kpiId].assignments
-                            .length;
-                });
-            });
-
-            let isFirstInDate = true;
-
-            dateEntry.kraOrder.forEach((kraId) => {
-                const kraEntry = dateEntry.kraMap[kraId];
+            periodEntry.kraOrder.forEach((kraId) => {
+                const kraEntry = periodEntry.kraMap[kraId];
                 let kraTotalRows = 0;
 
                 kraEntry.kpiOrder.forEach((kpiId) => {
@@ -204,8 +219,6 @@ export default function Index({ assignments = [] }: IndexProps) {
                     kpiEntry.assignments.forEach((assignment, index) => {
                         rows.push({
                             id: assignment.id,
-                            isFirstMonth: isFirstInDate,
-                            monthRowSpan: dateTotalRows,
                             isFirstKpi: index === 0,
                             kpiRowSpan: kpiEntry.assignments.length,
                             isFirstKra: isFirstInKra,
@@ -214,14 +227,19 @@ export default function Index({ assignments = [] }: IndexProps) {
                             assignment,
                         });
 
-                        isFirstInDate = false;
                         isFirstInKra = false;
                     });
                 });
             });
+
+            return {
+                key: periodKey,
+                period: periodEntry.period,
+                rows,
+            };
         });
 
-        return rows;
+        return blocks;
     }, [filteredAssignments]);
 
     const handleOpenModal = useCallback((assignment: ActionPlanAssignment) => {
@@ -268,7 +286,53 @@ export default function Index({ assignments = [] }: IndexProps) {
                     />
                 </div>
 
-                <DataTable columns={tableColumns} data={tableRows} />
+                <div className="space-y-6">
+                    {periodBlocks.map((block) => (
+                        <div key={block.key} className="space-y-2">
+                            {/* Period heading — sits above the table, not inside it */}
+                            <div className="flex items-center justify-between rounded-lg border bg-muted/30 px-3 py-2">
+                                <div>
+                                    <p className="text-sm font-semibold">
+                                        {block.period
+                                            ? format(
+                                                  new Date(
+                                                      block.period.year,
+                                                      block.period.month - 1,
+                                                  ),
+                                                  'MMMM yyyy',
+                                              )
+                                            : 'Unscheduled'}
+                                    </p>
+                                    {block.period && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {formatDate(
+                                                block.period.period_start,
+                                            )}
+                                            {' — '}
+                                            {formatDate(
+                                                block.period.period_end,
+                                            )}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {block.period && (
+                                    <Badge
+                                        variant="outline"
+                                        className="text-[10px]"
+                                    >
+                                        {block.period.status}
+                                    </Badge>
+                                )}
+                            </div>
+
+                            <DataTable
+                                columns={tableColumns}
+                                data={block.rows}
+                            />
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <ActionPlanSubmissionModal

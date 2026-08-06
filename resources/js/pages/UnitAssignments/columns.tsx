@@ -1,6 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, UploadCloud } from 'lucide-react';
 import { format } from 'date-fns';
+import { Check } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,13 +14,40 @@ export interface UnitOption {
     category?: 'Academic Units' | 'Non-Academic Units' | 'Satellite Campus';
 }
 
-const formatDate = (date?: string | null) => {
-    if (!date) return 'N/A';
-    return format(new Date(date), 'MMMM d, yyyy');
-};
-
 interface ColumnProps {
     onUpdateProgress: (assignment: ActionPlanAssignment) => void;
+}
+
+/*
+|--------------------------------------------------------------------------
+| SUBMIT BUTTON
+| Disabled once the assignment has actually been submitted, showing a
+| checkmark instead of the "Submit" label.
+|--------------------------------------------------------------------------
+*/
+function SubmitButton({
+    assignment,
+    onUpdateProgress,
+}: {
+    assignment: ActionPlanAssignment;
+    onUpdateProgress: (assignment: ActionPlanAssignment) => void;
+}) {
+    const isSubmitted = assignment.status === 'Submitted';
+
+    return (
+        <Button
+            variant="default"
+            className="w-[84px] cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isSubmitted}
+            onClick={() => onUpdateProgress(assignment)}
+        >
+            {isSubmitted ? (
+                <Check className="h-4 w-4 animate-in duration-300 zoom-in-50" />
+            ) : (
+                'Submit'
+            )}
+        </Button>
+    );
 }
 
 export const columns = ({
@@ -87,15 +114,14 @@ export const columns = ({
     */
     {
         id: 'progress',
-        header: 'Progress',
+        header: () => <div className="text-center">Progress</div>,
         cell: ({ row }) => {
             const assignment = row.original.assignment;
             // Explicitly parse and fall back to ensure reactivity catches numeric values
             const progress = Number(assignment.progress_percentage) || 0;
-            const status = assignment.status ?? 'Not Yet Submitted';
 
             return (
-                <div className="w-[85px] space-y-1">
+                <div className="w-full space-y-1 text-center">
                     <span className="font-semibold">{progress}%</span>
                 </div>
             );
@@ -125,14 +151,14 @@ export const columns = ({
 
     {
         id: 'status',
-        header: 'Status',
+        header: () => <div className="text-center">Status</div>,
         cell: ({ row }) => {
             const assignment = row.original.assignment;
             // Explicitly parse and fall back to ensure reactivity catches numeric values
             const status = assignment.status ?? 'Not Yet Submitted';
 
             return (
-                <div className="w-[100px] space-y-1">
+                <div className="flex w-full justify-center space-y-1">
                     <Badge
                         variant="secondary"
                         className={`text-[10px] ${
@@ -150,53 +176,28 @@ export const columns = ({
 
     /*
     |--------------------------------------------------------------------------
-    | TIMELINE (Start Date — End Date)
-    |--------------------------------------------------------------------------
-    */
-    {
-        id: 'timeline',
-        header: 'Start Date — Due Date',
-        cell: ({ row }) => {
-            const plan = row.original.assignment.action_plan;
-
-            if (!plan?.start_date && !plan?.end_date) {
-                return (
-                    <span className="text-xs text-muted-foreground">N/A</span>
-                );
-            }
-
-            return (
-                <div className="flex flex-col text-xs">
-                    <div className="text-[11px] text-muted-foreground">
-                        {formatDate(plan.start_date)}
-                        {' — '}
-                        {formatDate(plan.end_date)}
-                    </div>
-                </div>
-            );
-        },
-    },
-
-    /*
-    |--------------------------------------------------------------------------
     | RESPONSIBLE UNIT
     |--------------------------------------------------------------------------
     */
     {
         id: 'unit',
-        header: 'Responsible Unit',
+        header: () => <div className="text-center">Responsible Unit</div>,
         cell: ({ row }) => {
             const assignment = row.original.assignment;
             const unit = assignment.responsible_unit;
 
             if (!unit) {
                 return (
-                    <span className="text-xs text-muted-foreground">None</span>
+                    <div className="flex w-full justify-center">
+                        <span className="text-xs text-muted-foreground">
+                            None
+                        </span>
+                    </div>
                 );
             }
 
             return (
-                <div className="flex max-w-[180px] flex-wrap gap-1">
+                <div className="flex w-full flex-wrap justify-center gap-1">
                     <Badge variant="outline" className="text-[10px]">
                         {unit.code ?? unit.name}
                     </Badge>
@@ -212,36 +213,17 @@ export const columns = ({
     */
     {
         id: 'actions',
-        header: 'Action',
+        header: () => <div className="text-center">Action</div>,
         cell: ({ row }) => {
             const assignment = row.original.assignment;
 
             return (
-                <Button
-                    variant="default"
-                    className="cursor-pointer"
-                    onClick={() => onUpdateProgress(assignment)}
-                >
-                    Submit
-                </Button>
-                // <DropdownMenu>
-                //     <DropdownMenuTrigger asChild>
-                //         <Button variant="ghost" className="h-8 w-8 p-0">
-                //             <MoreHorizontal className="h-4 w-4" />
-                //         </Button>
-                //     </DropdownMenuTrigger>
-
-                //     <DropdownMenuContent align="end">
-                //         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-                //         <DropdownMenuItem
-                //             onClick={() => onUpdateProgress(assignment)}
-                //         >
-                //             <UploadCloud className="mr-2 h-4 w-4" />
-
-                //         </DropdownMenuItem>
-                //     </DropdownMenuContent>
-                // </DropdownMenu>
+                <div className="flex w-full justify-center">
+                    <SubmitButton
+                        assignment={assignment}
+                        onUpdateProgress={onUpdateProgress}
+                    />
+                </div>
             );
         },
     },

@@ -12,6 +12,7 @@ use App\Models\KeyPerformanceIndicator\Kpi;
 use App\Models\ResponsibleUnit\Units;
 use Illuminate\Database\Seeder;
 
+
 class ActionPlanSeeder extends Seeder
 {
     /**
@@ -421,20 +422,75 @@ class ActionPlanSeeder extends Seeder
                     ]
                 );
 
-                $unitIds = $this->resolveUnitIds($unitTokens, $academicIds, $nonAcademicIds, $unitsByCode);
+$period = \App\Models\ActionPlanPeriod::firstOrCreate(
+    [
+        'action_plan_id' => $actionPlan->id,
+        'month' => now()->month,
+        'year' => now()->year,
+    ],
+    [
+        'period_start' => now()->startOfMonth(),
 
-                foreach ($unitIds as $unitId) {
-                    ActionPlanAssignment::updateOrCreate(
-                        [
-                            'action_plan_id' => $actionPlan->id,
-                            'responsible_unit_id' => $unitId,
-                        ],
-                        [
-                            'progress_percentage' => 0,
-                            'status' => 'Not Yet Submitted',
-                        ]
-                    );
-                }
+        'period_end' => now()->endOfMonth(),
+
+        'submission_start' => now()
+            ->copy()
+            ->addMonth()
+            ->startOfMonth(),
+
+        'submission_deadline' => now()
+            ->copy()
+            ->addMonth()
+            ->startOfMonth()
+            ->addDays(5),
+
+        'review_start' => now()
+            ->copy()
+            ->addMonth()
+            ->startOfMonth(),
+
+        'review_end' => now()
+            ->copy()
+            ->addMonth()
+            ->startOfMonth()
+            ->addDays(5),
+
+        'approval_date' => now()
+            ->copy()
+            ->addMonth()
+            ->startOfMonth()
+            ->addDays(5),
+
+        'status' => 'Open',
+    ]
+);
+
+$unitIds = $this->resolveUnitIds(
+    $unitTokens,
+    $academicIds,
+    $nonAcademicIds,
+    $unitsByCode
+);
+
+foreach ($unitIds as $unitId) {
+
+    ActionPlanAssignment::updateOrCreate(
+        [
+            'action_plan_period_id' => $period->id,
+            'action_plan_id' => $actionPlan->id,
+            'responsible_unit_id' => $unitId,
+        ],
+        [
+            'progress_percentage' => 0,
+            'status' => 'Not Yet Submitted',
+        ]
+    );
+}
+
+
+
+
+
             }
         }
     }

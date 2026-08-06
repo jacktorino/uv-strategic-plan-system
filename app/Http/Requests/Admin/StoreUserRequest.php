@@ -16,8 +16,8 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'role' => ['required', 'string', 'in:admin,staff,unit_head'],
-            'responsible_unit_id' => ['required', 'exists:units,id'],
+            'role' => ['required', 'string', 'in:admin,planning_officer,kra_incharge,subkra_incharge,viewer'],
+         
         ];
     }
 }

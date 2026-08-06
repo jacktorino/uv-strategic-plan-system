@@ -15,8 +15,25 @@ trait TransformsActionPlans
         return [
             'id' => $plan->id,
             'description' => $plan->description,
-            'start_date' => $plan->start_date?->toDateString(),
-            'end_date' => $plan->end_date?->toDateString(),
+
+            // ActionPlan no longer stores its own start/end dates — the
+            // current reporting period is now the source of truth for
+            // the plan's schedule. Kept as flat keys for consumers that
+            // only need a quick date range.
+            'start_date' => optional($plan->currentPeriod)->period_start?->toDateString(),
+            'end_date' => optional($plan->currentPeriod)->period_end?->toDateString(),
+
+            // Full period details, for pages that want to display the
+            // reporting period (month/year, status) rather than just a
+            // raw date range.
+            'period' => $plan->currentPeriod ? [
+                'id' => $plan->currentPeriod->id,
+                'month' => $plan->currentPeriod->month,
+                'year' => $plan->currentPeriod->year,
+                'period_start' => $plan->currentPeriod->period_start?->toDateString(),
+                'period_end' => $plan->currentPeriod->period_end?->toDateString(),
+                'status' => $plan->currentPeriod->status,
+            ] : null,
 
             // Action Plan Calculated Progress
             'overall_progress' => $plan->overall_progress,
@@ -77,6 +94,7 @@ trait TransformsActionPlans
     protected function actionPlansForKraGroup(string $codePrefix)
     {
         return ActionPlan::with([
+            'currentPeriod',
             'kpi:id,kra_id,code,name,target',
             'kpi.kra:id,code,name',
             'assignments.responsibleUnit:id,name,code,category',

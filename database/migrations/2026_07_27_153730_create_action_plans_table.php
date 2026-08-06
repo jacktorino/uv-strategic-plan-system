@@ -20,8 +20,6 @@ return new class extends Migration
 
             $table->text('description');
 
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
 
             $table->unsignedInteger('order_no')->default(1);
 

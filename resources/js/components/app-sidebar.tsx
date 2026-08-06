@@ -217,6 +217,42 @@ export function AppSidebar() {
 
     /*
     |--------------------------------------------------------------------------
+    | SUB-KRA INCHARGE
+    |--------------------------------------------------------------------------
+    */
+    if (role === 'subkra_incharge') {
+        dashboardNavItems = [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: ChartColumnBig,
+            },
+        ];
+
+        kraNavItems = [
+            {
+                title: 'My KRAs',
+                href: '/kra',
+                icon: Building2,
+            },
+        ];
+
+        adminNavItems = [
+            {
+                title: 'KPIs',
+                href: '/kpis',
+                icon: Layers,
+            },
+            {
+                title: 'Action Plans',
+                href: '/action-plans',
+                icon: CheckCircle2,
+            },
+        ];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | RESPONSIBLE UNIT
     |--------------------------------------------------------------------------
     */
@@ -231,7 +267,7 @@ export function AppSidebar() {
 
         adminNavItems = [
             {
-                title: 'Unit Assignments',
+                title: 'My Assignments',
                 href: '/unit-assignments',
                 icon: ClipboardList,
             },

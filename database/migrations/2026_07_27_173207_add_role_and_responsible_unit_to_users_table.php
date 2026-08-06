@@ -17,6 +17,7 @@ return new class extends Migration
                 'admin',
                 'planning_officer',
                 'kra_incharge',
+                'subkra_incharge',
                 'responsible_unit',
                 'viewer',
             ])->default('viewer')->after('password');
