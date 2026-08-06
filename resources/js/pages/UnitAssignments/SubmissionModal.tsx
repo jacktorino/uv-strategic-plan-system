@@ -6,7 +6,6 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,28 +20,22 @@ interface Props {
     onClose: () => void;
 }
 
-const PRESET_PERCENTAGES = [0, 25, 50, 75, 100];
-
 export default function ActionPlanSubmissionModal({
     assignment,
     isOpen,
     onClose,
 }: Props) {
     const { data, setData, post, processing, errors, reset, clearErrors } =
-        useForm<{
-            progress_percentage: number | '';
-            submission_remarks: string;
-            attachment: File | null;
-        }>({
-            progress_percentage: '',
+        useForm({
+            progress_percentage: 100,
             submission_remarks: '',
-            attachment: null,
+            attachment: null as File | null,
         });
 
     useEffect(() => {
         if (assignment && isOpen) {
             setData({
-                progress_percentage: assignment.progress_percentage ?? '',
+                progress_percentage: 100,
                 submission_remarks: assignment.submission_remarks ?? '',
                 attachment: null,
             });
@@ -57,6 +50,7 @@ export default function ActionPlanSubmissionModal({
 
         post(`/unit-assignments/${assignment.id}/update-progress`, {
             preserveScroll: true,
+            forceFormData: true,
             onSuccess: () => {
                 reset();
                 onClose();
@@ -68,72 +62,19 @@ export default function ActionPlanSubmissionModal({
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-3xl">Submit</DialogTitle>
+                    <DialogTitle className="text-3xl">
+                        Submit Accomplishment
+                    </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-2">
-                    {/* Progress Percentage with Quick Recommendations */}
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="progress_percentage">
-                                Progress Percentage (%)
-                            </Label>
-                        </div>
-
-                        {/* Quick-Select Suggestion Chips */}
-                        <div className="flex flex-wrap gap-1.5">
-                            {PRESET_PERCENTAGES.map((pct) => {
-                                const isSelected =
-                                    data.progress_percentage === pct;
-                                return (
-                                    <button
-                                        key={pct}
-                                        type="button"
-                                        onClick={() =>
-                                            setData('progress_percentage', pct)
-                                        }
-                                        className={`rounded-md border px-3 py-1 text-xs font-medium transition-colors ${
-                                            isSelected
-                                                ? 'border-primary bg-primary text-primary-foreground'
-                                                : 'border-input bg-background text-muted-foreground hover:bg-muted'
-                                        }`}
-                                    >
-                                        {pct}%{' '}
-                                        {pct === 0
-                                            ? '(Not Started)'
-                                            : pct === 100
-                                              ? '(Completed)'
-                                              : ''}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <Input
-                            id="progress_percentage"
-                            type="number"
-                            min={0}
-                            max={100}
-                            placeholder="e.g. 50"
-                            value={data.progress_percentage}
-                            onChange={(e) =>
-                                setData(
-                                    'progress_percentage',
-                                    e.target.value === ''
-                                        ? ''
-                                        : Number(e.target.value),
-                                )
-                            }
-                            required
-                        />
-                        {errors.progress_percentage && (
-                            <p className="text-xs text-destructive">
-                                {errors.progress_percentage}
-                            </p>
-                        )}
+                    {/* Auto-complete Notice */}
+                    <div className="rounded-md border bg-muted p-3 text-sm">
+                        This submission will automatically mark this action plan
+                        as <strong>100% Completed</strong>.
                     </div>
 
-                    {/* Remarks / Accomplishment Details */}
+                    {/* Remarks */}
                     <div className="space-y-2">
                         <Label htmlFor="submission_remarks">
                             Remarks / Accomplishment Summary
@@ -141,7 +82,7 @@ export default function ActionPlanSubmissionModal({
                         <Textarea
                             id="submission_remarks"
                             rows={4}
-                            placeholder="Provide details about the activities conducted or reasons for progress..."
+                            placeholder="Provide details about the activities conducted or accomplishments..."
                             value={data.submission_remarks}
                             onChange={(e) =>
                                 setData('submission_remarks', e.target.value)
@@ -154,10 +95,10 @@ export default function ActionPlanSubmissionModal({
                         )}
                     </div>
 
-                    {/* File Attachment */}
+                    {/* Attachment */}
                     <div className="space-y-2">
                         <Label htmlFor="attachment">
-                            Attach Supporting Document (PDF, Doc, Image)
+                            Attach Supporting Document (Optional)
                         </Label>
                         <Input
                             id="attachment"
@@ -166,7 +107,7 @@ export default function ActionPlanSubmissionModal({
                             onChange={(e) =>
                                 setData(
                                     'attachment',
-                                    e.target.files ? e.target.files[0] : null,
+                                    e.target.files?.[0] ?? null,
                                 )
                             }
                         />
@@ -186,8 +127,9 @@ export default function ActionPlanSubmissionModal({
                         >
                             Cancel
                         </Button>
+
                         <Button type="submit" disabled={processing}>
-                            {processing ? 'Saving...' : 'Submit Update'}
+                            {processing ? 'Submitting...' : 'Submit'}
                         </Button>
                     </DialogFooter>
                 </form>

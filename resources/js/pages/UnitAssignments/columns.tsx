@@ -219,6 +219,7 @@ export const columns = ({
             return (
                 <Button
                     variant="default"
+                    className="cursor-pointer"
                     onClick={() => onUpdateProgress(assignment)}
                 >
                     Submit

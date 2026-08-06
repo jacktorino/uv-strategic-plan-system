@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import { format } from 'date-fns';
 
@@ -224,19 +224,23 @@ export default function Index({ assignments = [] }: IndexProps) {
         return rows;
     }, [filteredAssignments]);
 
-    function handleOpenModal(assignment: ActionPlanAssignment) {
+    const handleOpenModal = useCallback((assignment: ActionPlanAssignment) => {
         setSelectedAssignment(assignment);
         setIsModalOpen(true);
-    }
+    }, []);
 
-    function handleCloseModal() {
+    const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
         setSelectedAssignment(null);
-    }
+    }, []);
 
-    const tableColumns = columns({
-        onUpdateProgress: handleOpenModal,
-    });
+    const tableColumns = useMemo(
+        () =>
+            columns({
+                onUpdateProgress: handleOpenModal,
+            }),
+        [handleOpenModal],
+    );
 
     return (
         <>
