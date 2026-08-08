@@ -6,21 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('kpis', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('kra_id')
+            $table->foreignId('subkra_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
             $table->string('code')->unique();      // e.g. 1.1.1
             $table->text('name');
-       
 
             $table->unsignedInteger('order_no')->default(1);
 
@@ -28,9 +24,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('kpis');

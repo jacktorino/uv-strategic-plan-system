@@ -13,6 +13,7 @@ import {
     UserCheck,
     BookOpenText,
     ClipboardList,
+    FileText,
 } from 'lucide-react';
 
 import AppLogo from '@/components/app-logo';
@@ -105,6 +106,11 @@ export function AppSidebar() {
                 href: '/action-plans',
                 icon: CheckCircle2,
             },
+            {
+                title: 'Reports',
+                href: '/reports',
+                icon: FileText,
+            },
             // {
             //     title: 'Unit Submissions',
             //     href: '/unit-assignments',
@@ -176,6 +182,11 @@ export function AppSidebar() {
                 href: '/unit-assignments',
                 icon: ClipboardList,
             },
+            {
+                title: 'Reports',
+                href: '/reports',
+                icon: FileText,
+            },
         ];
     }
 
@@ -231,22 +242,14 @@ export function AppSidebar() {
 
         kraNavItems = [
             {
-                title: 'My KRAs',
+                title: 'My KRAs ',
                 href: '/kra',
                 icon: Building2,
             },
-        ];
-
-        adminNavItems = [
             {
-                title: 'KPIs',
-                href: '/kpis',
-                icon: Layers,
-            },
-            {
-                title: 'Action Plans',
-                href: '/action-plans',
-                icon: CheckCircle2,
+                title: 'Reports',
+                href: '/reports',
+                icon: FileText,
             },
         ];
     }

@@ -15,13 +15,13 @@ class UpdateKpiRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kra_id' => ['required', 'exists:kras,id'],
+            'subkra_id' => ['required', 'exists:subkras,id'],
             'code' => [
                 'required',
                 'string',
                 'max:20',
                 Rule::unique('kpis', 'code')
-                    ->where('kra_id', $this->kra_id)
+                    ->where('subkra_id', $this->subkra_id)
                     ->ignore($this->route('kpi')),
             ],
             'name' => ['required', 'string', 'max:255'],

@@ -4,6 +4,7 @@ namespace App\Models\KeyPerformanceIndicator;
 
 use App\Models\InnovativeActionPlan\ActionPlan;
 use App\Models\KeyResultArea\Kra;
+use App\Models\SubKeyResultsArea\SubKra;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,15 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Kpi extends Model
 {
     protected $fillable = [
-        'kra_id',
+        'subkra_id',
         'code',
         'name',
         'order_no',
     ];
 
-    public function kra(): BelongsTo
+    public function subkra(): BelongsTo
     {
-        return $this->belongsTo(Kra::class);
+        return $this->belongsTo(SubKra::class);
     }
 
     public function actionPlans(): HasMany
@@ -27,6 +28,10 @@ class Kpi extends Model
         return $this->hasMany(ActionPlan::class);
     }
 
+    public function kra(): BelongsTo
+{
+    return $this->belongsTo(Kra::class);
+}
     /**
      * KPI progress, averaged across its action plans' overall_progress.
      */

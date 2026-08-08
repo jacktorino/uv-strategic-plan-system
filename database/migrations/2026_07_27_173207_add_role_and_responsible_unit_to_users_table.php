@@ -27,6 +27,13 @@ return new class extends Migration
                 ->after('role')
                 ->constrained('units')
                 ->nullOnDelete();
+
+            // <-- Add subkra_id here
+            $table->foreignId('subkra_id')
+                ->nullable()
+                ->after('responsible_unit_id')
+                ->constrained('subkras')
+                ->nullOnDelete();
         });
     }
 
@@ -38,10 +45,12 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
 
             $table->dropForeign(['responsible_unit_id']);
+            $table->dropForeign(['subkra_id']); // <-- Drop foreign key
 
             $table->dropColumn([
                 'role',
                 'responsible_unit_id',
+                'subkra_id', // <-- Drop column
             ]);
         });
     }

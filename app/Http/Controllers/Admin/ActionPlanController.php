@@ -8,27 +8,45 @@ use App\Http\Requests\Admin\ActionPlan\UpdateActionPlanRequest;
 use App\Models\Assignment\ActionPlanAssignment;
 use App\Models\InnovativeActionPlan\ActionPlan;
 use App\Models\KeyPerformanceIndicator\Kpi;
-use App\Models\KeyResultArea\Kra;
+
 use App\Models\ResponsibleUnit\Units;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\ActionPlanPeriod;
+use App\Models\KeyResultArea\Kra;
+use App\Models\SubKeyResultsArea\SubKra;
 
 class ActionPlanController extends Controller
 {
     public function index(): Response
     {
-            $actionPlans = ActionPlan::with([
+        $actionPlans = ActionPlan::with([
             'currentPeriod',
-            'kpi:id,kra_id,code,name,target',
-            'kpi.kra:id,code,name',
+            'kpi:id,subkra_id,code,name,target',
+            'kpi.subkra:id,kra_id,code,name',
+            'kpi.subkra.kra:id,code,name',
             'assignments.responsibleUnit:id,name,code,category',
         ])
-            ->orderBy('order_no')
+            // Join tables to sort by subkra code first, then action plan order_no
+            ->join('kpis', 'action_plans.kpi_id', '=', 'kpis.id')
+            ->join('subkras', 'kpis.subkra_id', '=', 'subkras.id')
+            ->orderBy('subkras.code', 'asc')
+            ->orderBy('action_plans.order_no', 'asc')
+            ->select('action_plans.*')
             ->get()
             ->map(function (ActionPlan $plan) {
+                // `assignments` is loaded across every period this plan has
+                // ever had, so a unit assigned in one month and again the
+                // next comes back as two rows for the same plan. Only the
+                // current period's assignments should reach the frontend.
+                $currentPeriodId = optional($plan->currentPeriod)->id;
+
+                $currentAssignments = $currentPeriodId
+                    ? $plan->assignments->where('action_plan_period_id', $currentPeriodId)->values()
+                    : collect();
+
                 return [
                     'id' => $plan->id,
                     'description' => $plan->description,
@@ -44,23 +62,24 @@ class ActionPlanController extends Controller
                         'target' => $plan->kpi->target,
                         'overall_progress' => $plan->kpi->overall_progress,
 
-                        'kra' => $plan->kpi->kra ? [
-                            'id' => $plan->kpi->kra->id,
-                            'code' => $plan->kpi->kra->code,
-                            'name' => $plan->kpi->kra->name,
+                        // Map SubKra data onto 'kra' so the frontend groups by SubKra instead of top-level KRA
+                        'kra' => $plan->kpi->subkra ? [
+                            'id' => $plan->kpi->subkra->id,
+                            'code' => $plan->kpi->subkra->code,
+                            'name' => $plan->kpi->subkra->name,
                         ] : null,
                     ] : null,
 
-                    'responsible_unit_ids' => $plan->assignments
+                    'responsible_unit_ids' => $currentAssignments
                         ->pluck('responsible_unit_id')
                         ->values(),
 
-                    'responsible_units' => $plan->assignments
+                    'responsible_units' => $currentAssignments
                         ->pluck('responsibleUnit')
                         ->filter()
                         ->values(),
 
-                    'assignments' => $plan->assignments->map(function ($assignment) {
+                    'assignments' => $currentAssignments->map(function ($assignment) {
                         return [
                             'id' => $assignment->id,
                             'responsible_unit_id' => $assignment->responsible_unit_id,
@@ -70,7 +89,7 @@ class ActionPlanController extends Controller
                             'status' => $assignment->status,
                             'submitted_at' => $assignment->submitted_at,
                         ];
-                    }),
+                    })->values(),
                 ];
             });
 
@@ -78,6 +97,10 @@ class ActionPlanController extends Controller
             'actionPlans' => $actionPlans,
 
             'kras' => Kra::select('id', 'code', 'name')
+                ->orderBy('code')
+                ->get(),
+
+            'subkras' => SubKra::select('id', 'kra_id', 'code', 'name')
                 ->orderBy('order_no')
                 ->get(),
 
@@ -86,7 +109,7 @@ class ActionPlanController extends Controller
                 ->map(function ($kpi) {
                     return [
                         'id' => $kpi->id,
-                        'kra_id' => $kpi->kra_id,
+                        'subkra_id' => $kpi->subkra_id,
                         'code' => $kpi->code,
                         'name' => $kpi->name,
                         'target' => $kpi->target,
@@ -94,106 +117,25 @@ class ActionPlanController extends Controller
                     ];
                 }),
 
-            'units' => Units::select(
-                'id',
-                'code',
-                'name',
-                'category',
-                'order_no'
-            )
+            'units' => Units::select('id', 'code', 'name', 'category', 'order_no')
                 ->orderBy('order_no')
                 ->get(),
         ]);
     }
 
-public function store(StoreActionPlanRequest $request): RedirectResponse
-{
-    $validated = $request->validated();
+    public function store(StoreActionPlanRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
 
-    $unitIds = $validated['responsible_unit_ids'] ?? [];
-    unset($validated['responsible_unit_ids']);
+        $unitIds = $validated['responsible_unit_ids'] ?? [];
+        unset($validated['responsible_unit_ids']);
 
-    // Action Plan no longer stores start/end dates
-    unset($validated['start_date'], $validated['end_date']);
+        // Action Plan no longer stores start/end dates
+        unset($validated['start_date'], $validated['end_date']);
 
-    $actionPlan = ActionPlan::create($validated);
+        $actionPlan = ActionPlan::create($validated);
 
-    // Create current month's reporting period
-    $period = ActionPlanPeriod::create([
-        'action_plan_id' => $actionPlan->id,
-
-        'month' => now()->month,
-        'year' => now()->year,
-
-        'period_start' => now()->startOfMonth(),
-        'period_end' => now()->endOfMonth(),
-
-        'submission_start' => now()
-            ->copy()
-            ->addMonth()
-            ->startOfMonth(),
-
-        'submission_deadline' => now()
-            ->copy()
-            ->addMonth()
-            ->startOfMonth()
-            ->addDays(5),
-
-        'review_start' => now()
-            ->copy()
-            ->addMonth()
-            ->startOfMonth(),
-
-        'review_end' => now()
-            ->copy()
-            ->addMonth()
-            ->startOfMonth()
-            ->addDays(5),
-
-        'approval_date' => now()
-            ->copy()
-            ->addMonth()
-            ->startOfMonth()
-            ->addDays(5),
-
-        'status' => 'Open',
-    ]);
-
-    foreach ($unitIds as $unitId) {
-
-        ActionPlanAssignment::create([
-            'action_plan_period_id' => $period->id,
-            'action_plan_id' => $actionPlan->id,
-            'responsible_unit_id' => $unitId,
-
-            'progress_percentage' => 0,
-            'status' => 'Not Yet Submitted',
-        ]);
-    }
-
-    return redirect()
-        ->route('action-plans.index')
-        ->with('success', 'Action Plan created successfully.');
-}
-
-public function update(
-    UpdateActionPlanRequest $request,
-    ActionPlan $actionPlan
-): RedirectResponse {
-
-    $validated = $request->validated();
-
-    $unitIds = $validated['responsible_unit_ids'] ?? [];
-    unset($validated['responsible_unit_ids']);
-
-    unset($validated['start_date'], $validated['end_date']);
-
-    $actionPlan->update($validated);
-
-    $period = $actionPlan->currentPeriod;
-
-    if (!$period) {
-
+        // Create current month's reporting period
         $period = ActionPlanPeriod::create([
             'action_plan_id' => $actionPlan->id,
 
@@ -233,33 +175,108 @@ public function update(
 
             'status' => 'Open',
         ]);
+
+        foreach ($unitIds as $unitId) {
+
+            ActionPlanAssignment::create([
+                'action_plan_period_id' => $period->id,
+                'action_plan_id' => $actionPlan->id,
+                'responsible_unit_id' => $unitId,
+
+                'progress_percentage' => 0,
+                'status' => 'Not Yet Submitted',
+            ]);
+        }
+
+        return redirect()
+            ->route('action-plans.index')
+            ->with('success', 'Action Plan created successfully.');
     }
 
-    $existingUnitIds = $period->assignments()
-        ->pluck('responsible_unit_id')
-        ->all();
+    public function update(
+        UpdateActionPlanRequest $request,
+        ActionPlan $actionPlan
+    ): RedirectResponse {
 
-    foreach (array_diff($unitIds, $existingUnitIds) as $unitId) {
+        $validated = $request->validated();
 
-        ActionPlanAssignment::create([
-            'action_plan_period_id' => $period->id,
-            'action_plan_id' => $actionPlan->id,
-            'responsible_unit_id' => $unitId,
+        $unitIds = $validated['responsible_unit_ids'] ?? [];
+        unset($validated['responsible_unit_ids']);
 
-            'progress_percentage' => 0,
-            'status' => 'Not Yet Submitted',
-        ]);
+        unset($validated['start_date'], $validated['end_date']);
+
+        $actionPlan->update($validated);
+
+        $period = $actionPlan->currentPeriod;
+
+        if (!$period) {
+
+            $period = ActionPlanPeriod::create([
+                'action_plan_id' => $actionPlan->id,
+
+                'month' => now()->month,
+                'year' => now()->year,
+
+                'period_start' => now()->startOfMonth(),
+                'period_end' => now()->endOfMonth(),
+
+                'submission_start' => now()
+                    ->copy()
+                    ->addMonth()
+                    ->startOfMonth(),
+
+                'submission_deadline' => now()
+                    ->copy()
+                    ->addMonth()
+                    ->startOfMonth()
+                    ->addDays(5),
+
+                'review_start' => now()
+                    ->copy()
+                    ->addMonth()
+                    ->startOfMonth(),
+
+                'review_end' => now()
+                    ->copy()
+                    ->addMonth()
+                    ->startOfMonth()
+                    ->addDays(5),
+
+                'approval_date' => now()
+                    ->copy()
+                    ->addMonth()
+                    ->startOfMonth()
+                    ->addDays(5),
+
+                'status' => 'Open',
+            ]);
+        }
+
+        $existingUnitIds = $period->assignments()
+            ->pluck('responsible_unit_id')
+            ->all();
+
+        foreach (array_diff($unitIds, $existingUnitIds) as $unitId) {
+
+            ActionPlanAssignment::create([
+                'action_plan_period_id' => $period->id,
+                'action_plan_id' => $actionPlan->id,
+                'responsible_unit_id' => $unitId,
+
+                'progress_percentage' => 0,
+                'status' => 'Not Yet Submitted',
+            ]);
+        }
+
+        $period->assignments()
+            ->where('status', 'Not Yet Submitted')
+            ->whereNotIn('responsible_unit_id', $unitIds)
+            ->delete();
+
+        return redirect()
+            ->route('action-plans.index')
+            ->with('success', 'Action Plan updated successfully.');
     }
-
-    $period->assignments()
-        ->where('status', 'Not Yet Submitted')
-        ->whereNotIn('responsible_unit_id', $unitIds)
-        ->delete();
-
-    return redirect()
-        ->route('action-plans.index')
-        ->with('success', 'Action Plan updated successfully.');
-}
 
     public function destroy(ActionPlan $actionPlan): RedirectResponse
     {

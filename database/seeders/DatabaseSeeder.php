@@ -13,10 +13,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ResponsibleUnitSeeder::class,
+            UserSeeder::class,
             KraSeeder::class,
+            SubKraSeeder::class,
             KpiSeeder::class,
             ActionPlanSeeder::class,
-            UserSeeder::class,
+     
         ]);
     }
 }

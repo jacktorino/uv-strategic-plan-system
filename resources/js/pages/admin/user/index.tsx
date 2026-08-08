@@ -23,13 +23,20 @@ interface UnitOption {
     name: string;
 }
 
+interface SubKraOption {
+    id: number;
+    code: string;
+    name: string;
+}
+
 interface IndexProps {
     users: User[];
     roles: RoleOption[];
     units: UnitOption[];
+    subkras: SubKraOption[];
 }
 
-export default function Index({ users, roles, units }: IndexProps) {
+export default function Index({ users, roles, units, subkras }: IndexProps) {
     const [search, setSearch] = useState('');
 
     const [createOpen, setCreateOpen] = useState(false);
@@ -60,23 +67,21 @@ export default function Index({ users, roles, units }: IndexProps) {
 
     return (
         <>
-            <Head title="Accounts" />
+            <Head title="Users" />
 
             <div className="space-y-4 p-4">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">Accounts</h1>
+                    <Input
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="max-w-sm"
+                    />
                     <Button onClick={() => setCreateOpen(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         New Account
                     </Button>
                 </div>
-
-                <Input
-                    placeholder="Search..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="max-w-sm"
-                />
 
                 <DataTable columns={tableColumns} data={filteredUsers} />
             </div>
@@ -86,6 +91,7 @@ export default function Index({ users, roles, units }: IndexProps) {
                 onOpenChange={setCreateOpen}
                 roles={roles}
                 units={units}
+                subkras={subkras}
             />
 
             <EditSheet
@@ -94,6 +100,7 @@ export default function Index({ users, roles, units }: IndexProps) {
                 user={selectedUser}
                 roles={roles}
                 units={units}
+                subkras={subkras}
             />
 
             <DeleteDialog
@@ -104,3 +111,12 @@ export default function Index({ users, roles, units }: IndexProps) {
         </>
     );
 }
+
+Index.layout = {
+    breadcrumbs: [
+        {
+            title: 'Users',
+            href: '#',
+        },
+    ],
+};

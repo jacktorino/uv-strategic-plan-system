@@ -22,11 +22,6 @@ import {
     Area,
 } from 'recharts';
 
-interface SubmissionStat {
-    status: string;
-    count: number;
-}
-
 interface KpiStat {
     name: string;
     progress: number;
@@ -34,6 +29,11 @@ interface KpiStat {
 
 interface KraStat {
     kra: string;
+    progress: number;
+}
+
+interface ProgressTrendPoint {
+    month: string;
     progress: number;
 }
 
@@ -47,11 +47,16 @@ interface DashboardProps {
     totalUsersCount?: number;
     totalKPICount?: number;
     totalActionPlanCount?: number;
-    submissionStats?: SubmissionStat[];
     kpiStats?: KpiStat[];
     kraStats?: KraStat[];
-    overallProgressTrend?: { month: string; progress: number }[];
+    overallProgressTrend?: ProgressTrendPoint[];
     [key: string]: any;
+}
+
+function statusColor(progress: number): string {
+    if (progress >= 80) return 'bg-emerald-500';
+    if (progress >= 50) return 'bg-amber-500';
+    return 'bg-red-500';
 }
 
 export default function Dashboard() {
@@ -61,6 +66,7 @@ export default function Dashboard() {
         totalKPICount = 0,
         totalActionPlanCount = 0,
         kpiStats = [],
+        kraStats = [],
         overallProgressTrend = [],
     } = usePage<DashboardProps>().props;
 
@@ -130,8 +136,8 @@ export default function Dashboard() {
                     </Card>
                 </div>
 
-                {/* KPI Bar Chart */}
-                <div className="grid grid-cols-1 gap-4">
+                {/* KPI Bar Chart + KRA Progress */}
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <Card>
                         <CardHeader>
                             <CardTitle>Key Performance Indicators</CardTitle>
@@ -181,6 +187,46 @@ export default function Dashboard() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    <Card >
+                        <CardHeader>
+                            <CardTitle>Progress by KRA</CardTitle>
+                            <CardDescription>
+                                Average across all action plans per key result
+                                area
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {kraStats.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                    No KRA data available yet.
+                                </p>
+                            ) : (
+                                <div className="flex flex-col gap-4">
+                                    {kraStats.map((stat) => (
+                                        <div key={stat.kra}>
+                                            <div className="mb-1 flex items-center justify-between text-sm">
+                                                <span className="font-medium">
+                                                    {stat.kra}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {stat.progress}%
+                                                </span>
+                                            </div>
+                                            <div className="h-2 w-full rounded-full bg-muted">
+                                                <div
+                                                    className={`h-2 rounded-full ${statusColor(stat.progress)}`}
+                                                    style={{
+                                                        width: `${stat.progress}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {/* Strategic Plan Area Chart */}
@@ -188,69 +234,76 @@ export default function Dashboard() {
                     <CardHeader>
                         <CardTitle>Overall Strategic Plan Progress</CardTitle>
                         <CardDescription>
-                            Trend across reporting periods
+                            Trend across the last{' '}
+                            {overallProgressTrend.length || 0} reporting periods
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[320px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={overallProgressTrend}>
-                                    <defs>
-                                        <linearGradient
-                                            id="colorProgress"
-                                            x1="0"
-                                            y1="0"
-                                            x2="0"
-                                            y2="1"
-                                        >
-                                            <stop
-                                                offset="5%"
-                                                stopColor="var(--chart-2)"
-                                                stopOpacity={0.4}
-                                            />
-                                            <stop
-                                                offset="95%"
-                                                stopColor="var(--chart-2)"
-                                                stopOpacity={0}
-                                            />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid
-                                        strokeDasharray="3 3"
-                                        stroke="var(--border)"
-                                    />
-                                    <XAxis
-                                        dataKey="month"
-                                        fontSize={12}
-                                        tickLine={false}
-                                        stroke="var(--muted-foreground)"
-                                    />
-                                    <YAxis
-                                        domain={[0, 100]}
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        stroke="var(--muted-foreground)"
-                                    />
-                                    <Tooltip
-                                        contentStyle={{
-                                            backgroundColor: 'var(--card)',
-                                            borderColor: 'var(--border)',
-                                            borderRadius: 'var(--radius)',
-                                            color: 'var(--card-foreground)',
-                                        }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="progress"
-                                        stroke="var(--chart-2)"
-                                        strokeWidth={2}
-                                        fillOpacity={1}
-                                        fill="url(#colorProgress)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
+                        {overallProgressTrend.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                                No reporting periods have closed yet.
+                            </p>
+                        ) : (
+                            <div className="h-[320px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={overallProgressTrend}>
+                                        <defs>
+                                            <linearGradient
+                                                id="colorProgress"
+                                                x1="0"
+                                                y1="0"
+                                                x2="0"
+                                                y2="1"
+                                            >
+                                                <stop
+                                                    offset="5%"
+                                                    stopColor="var(--chart-2)"
+                                                    stopOpacity={0.4}
+                                                />
+                                                <stop
+                                                    offset="95%"
+                                                    stopColor="var(--chart-2)"
+                                                    stopOpacity={0}
+                                                />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid
+                                            strokeDasharray="3 3"
+                                            stroke="var(--border)"
+                                        />
+                                        <XAxis
+                                            dataKey="month"
+                                            fontSize={12}
+                                            tickLine={false}
+                                            stroke="var(--muted-foreground)"
+                                        />
+                                        <YAxis
+                                            domain={[0, 100]}
+                                            fontSize={12}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            stroke="var(--muted-foreground)"
+                                        />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'var(--card)',
+                                                borderColor: 'var(--border)',
+                                                borderRadius: 'var(--radius)',
+                                                color: 'var(--card-foreground)',
+                                            }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="progress"
+                                            stroke="var(--chart-2)"
+                                            strokeWidth={2}
+                                            fillOpacity={1}
+                                            fill="url(#colorProgress)"
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

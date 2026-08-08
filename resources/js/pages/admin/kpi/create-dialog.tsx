@@ -22,7 +22,7 @@ import {
     SelectItem,
 } from '@/components/ui/select';
 
-interface KraOption {
+interface SubKraOption {
     id: number;
     code?: string;
     name: string;
@@ -31,12 +31,16 @@ interface KraOption {
 interface CreateDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    kras: KraOption[];
+    subkras: SubKraOption[];
 }
 
-export function CreateDialog({ open, onOpenChange, kras }: CreateDialogProps) {
+export function CreateDialog({
+    open,
+    onOpenChange,
+    subkras,
+}: CreateDialogProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        kra_id: '',
+        subkra_id: '',
         code: '',
         name: '',
         order_no: '',
@@ -54,10 +58,12 @@ export function CreateDialog({ open, onOpenChange, kras }: CreateDialogProps) {
         });
     }
 
-    // Helper to format option text (e.g. "KRA-01 - Key Result Area Name")
-    const selectedKra = kras.find((k) => String(k.id) === data.kra_id);
-    const getKraLabel = (k: KraOption) =>
-        k.code ? `${k.code} - ${k.name}` : k.name;
+    // Helper to format option text (e.g. "1.1 - Sub-KRA Name")
+    const selectedSubKra = subkras.find(
+        (sk) => String(sk.id) === data.subkra_id,
+    );
+    const getSubKraLabel = (sk: SubKraOption) =>
+        sk.code ? `${sk.code} - ${sk.name}` : sk.name;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -68,29 +74,37 @@ export function CreateDialog({ open, onOpenChange, kras }: CreateDialogProps) {
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
                     <div className="space-y-2">
-                        <Label htmlFor="kra_id">KRA</Label>
+                        <Label htmlFor="subkra_id">Sub-KRA</Label>
                         <Select
-                            value={data.kra_id}
-                            onValueChange={(value) => setData('kra_id', value)}
+                            value={data.subkra_id}
+                            onValueChange={(value) =>
+                                setData('subkra_id', value)
+                            }
                         >
-                            <SelectTrigger id="kra_id">
-                                <SelectValue placeholder="Select KRA">
-                                    {selectedKra
-                                        ? getKraLabel(selectedKra)
-                                        : 'Select KRA'}
+                            <SelectTrigger id="subkra_id">
+                                <SelectValue placeholder="Select Sub-KRA">
+                                    {selectedSubKra
+                                        ? getSubKraLabel(selectedSubKra)
+                                        : 'Select Sub-KRA'}
                                 </SelectValue>
                             </SelectTrigger>
-                            <SelectContent>
-                                {kras.map((k) => (
-                                    <SelectItem key={k.id} value={String(k.id)}>
-                                        {getKraLabel(k)}
+                            <SelectContent
+                                position="popper"
+                                className="z-[100]"
+                            >
+                                {subkras.map((sk) => (
+                                    <SelectItem
+                                        key={sk.id}
+                                        value={String(sk.id)}
+                                    >
+                                        {getSubKraLabel(sk)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
-                        {errors.kra_id && (
+                        {errors.subkra_id && (
                             <p className="text-xs text-destructive">
-                                {errors.kra_id}
+                                {errors.subkra_id}
                             </p>
                         )}
                     </div>

@@ -13,7 +13,7 @@ import { CreateDialog } from './create-dialog';
 import { EditSheet } from './edit-sheet';
 import { DeleteDialog } from './delete-dialog';
 
-interface KraOption {
+interface SubKraOption {
     id: number;
     code?: string;
     name: string;
@@ -21,10 +21,10 @@ interface KraOption {
 
 interface IndexProps {
     kpis: Kpi[];
-    kras: KraOption[];
+    subkras: SubKraOption[];
 }
 
-export default function Index({ kpis, kras }: IndexProps) {
+export default function Index({ kpis, subkras }: IndexProps) {
     const [search, setSearch] = useState('');
     const [createOpen, setCreateOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
@@ -80,13 +80,13 @@ export default function Index({ kpis, kras }: IndexProps) {
             <CreateDialog
                 open={createOpen}
                 onOpenChange={setCreateOpen}
-                kras={kras}
+                subkras={subkras}
             />
             <EditSheet
                 open={editOpen}
                 onOpenChange={setEditOpen}
                 kpi={selectedKpi}
-                kras={kras}
+                subkras={subkras}
             />
             <DeleteDialog
                 open={deleteOpen}

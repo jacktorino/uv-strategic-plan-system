@@ -22,10 +22,17 @@ class ActionPlanAssignmentController extends Controller
         $user = $request->user();
 
         $query = ActionPlanAssignment::with([
-            'actionPlan.kpi.kra',
+            'actionPlan.kpi.subkra.kra',
             'responsibleUnit',
             'period',
-        ]);
+        ])
+            // Join tables to sort by subkra code first, then action plan order_no
+            ->join('action_plans', 'action_plan_assignments.action_plan_id', '=', 'action_plans.id')
+            ->join('kpis', 'action_plans.kpi_id', '=', 'kpis.id')
+            ->join('subkras', 'kpis.subkra_id', '=', 'subkras.id')
+            ->orderBy('subkras.code', 'asc')
+            ->orderBy('action_plans.order_no', 'asc')
+            ->select('action_plan_assignments.*');
 
         // Restrict to responsible unit if not an admin
         if ($user->role !== 'admin') {
@@ -39,7 +46,6 @@ class ActionPlanAssignmentController extends Controller
         }
 
         $assignments = $query
-            ->orderBy('action_plan_period_id')
             ->get()
             ->map(fn (ActionPlanAssignment $assignment) => $this->transformAssignment($assignment));
 
@@ -56,7 +62,7 @@ class ActionPlanAssignmentController extends Controller
         $this->authorizeUnitAccess($request->user(), $assignment);
 
         $assignment->load([
-            'actionPlan.kpi.kra',
+            'actionPlan.kpi.subkra.kra',
             'responsibleUnit',
             'period',
         ]);
@@ -196,10 +202,18 @@ class ActionPlanAssignmentController extends Controller
                     'code'             => $assignment->actionPlan->kpi->code ?? '',
                     'name'             => $assignment->actionPlan->kpi->name ?? '',
                     'overall_progress' => $assignment->actionPlan->kpi->overall_progress ?? 0,
-                    'kra'              => $assignment->actionPlan->kpi->kra ? [
-                        'id'   => $assignment->actionPlan->kpi->kra->id,
-                        'code' => $assignment->actionPlan->kpi->kra->code ?? '',
-                        'name' => $assignment->actionPlan->kpi->kra->name ?? '',
+
+                    // Map SubKra data onto 'kra' so frontend grouping reflects the sub-area
+                    'kra' => $assignment->actionPlan->kpi->subkra ? [
+                        'id'   => $assignment->actionPlan->kpi->subkra->id,
+                        'code' => $assignment->actionPlan->kpi->subkra->code ?? '',
+                        'name' => $assignment->actionPlan->kpi->subkra->name ?? '',
+                    ] : null,
+
+                    'subkra' => $assignment->actionPlan->kpi->subkra ? [
+                        'id'   => $assignment->actionPlan->kpi->subkra->id,
+                        'code' => $assignment->actionPlan->kpi->subkra->code ?? '',
+                        'name' => $assignment->actionPlan->kpi->subkra->name ?? '',
                     ] : null,
                 ] : null,
             ] : null,

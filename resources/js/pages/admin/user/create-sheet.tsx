@@ -31,11 +31,18 @@ interface UnitOption {
     name: string;
 }
 
+interface SubKraOption {
+    id: number;
+    code: string;
+    name: string;
+}
+
 interface CreateSheetProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     roles: RoleOption[];
     units: UnitOption[];
+    subkras?: SubKraOption[];
 }
 
 export function CreateSheet({
@@ -43,12 +50,14 @@ export function CreateSheet({
     onOpenChange,
     roles,
     units,
+    subkras = [],
 }: CreateSheetProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         role: '',
         responsible_unit_id: '',
+        subkra_id: '',
     });
 
     function handleSubmit(e: React.FormEvent) {
@@ -70,13 +79,13 @@ export function CreateSheet({
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent>
+            <SheetContent className="overflow-y-auto">
                 <form onSubmit={handleSubmit} className="flex h-full flex-col">
                     <SheetHeader>
                         <SheetTitle>New Account</SheetTitle>
                     </SheetHeader>
 
-                    <div className="flex-1 space-y-4 px-4">
+                    <div className="flex-1 space-y-4 px-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Name</Label>
                             <Input
@@ -114,14 +123,20 @@ export function CreateSheet({
                             <Label htmlFor="role">Role</Label>
                             <Select
                                 value={data.role}
-                                onValueChange={(value) =>
-                                    setData('role', value)
-                                }
+                                onValueChange={(value) => {
+                                    setData('role', value);
+                                    if (value !== 'subkra_incharge') {
+                                        setData('subkra_id', '');
+                                    }
+                                }}
                             >
                                 <SelectTrigger id="role">
                                     <SelectValue placeholder="Select role" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent
+                                    position="popper"
+                                    className="z-[100] w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width]"
+                                >
                                     {roles.map((r) => (
                                         <SelectItem
                                             key={r.value}
@@ -139,6 +154,40 @@ export function CreateSheet({
                             )}
                         </div>
 
+                        {data.role === 'subkra_incharge' && (
+                            <div className="animate-in space-y-2 duration-200 fade-in-50">
+                                <Label htmlFor="subkra_id">Sub-KRA</Label>
+                                <Select
+                                    value={data.subkra_id}
+                                    onValueChange={(value) =>
+                                        setData('subkra_id', value)
+                                    }
+                                >
+                                    <SelectTrigger id="subkra_id">
+                                        <SelectValue placeholder="Select sub-KRA" />
+                                    </SelectTrigger>
+                                    <SelectContent
+                                        position="popper"
+                                        className="z-[100] w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width]"
+                                    >
+                                        {subkras?.map((sk) => (
+                                            <SelectItem
+                                                key={sk.id}
+                                                value={String(sk.id)}
+                                            >
+                                                {sk.code} - {sk.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.subkra_id && (
+                                    <p className="text-sm text-red-600">
+                                        {errors.subkra_id}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         <div className="space-y-2">
                             <Label htmlFor="responsible_unit_id">
                                 Responsible Unit
@@ -152,7 +201,10 @@ export function CreateSheet({
                                 <SelectTrigger id="responsible_unit_id">
                                     <SelectValue placeholder="Select unit" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent
+                                    position="popper"
+                                    className="z-[100] w-[--radix-select-trigger-width] min-w-[--radix-select-trigger-width]"
+                                >
                                     {units.map((u) => (
                                         <SelectItem
                                             key={u.id}

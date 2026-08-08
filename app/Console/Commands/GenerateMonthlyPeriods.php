@@ -9,73 +9,69 @@ use Illuminate\Console\Command;
 
 class GenerateMonthlyPeriods extends Command
 {
-    protected $signature = 'periods:generate';
+    protected $signature = 'periods:generate {--month=} {--year=}';
 
     protected $description = 'Generate monthly reporting periods';
 
-public function handle(): int
-{
-    $month = now()->month;
-    $year = now()->year;
+    public function handle(): int
+    {
+        $month = (int) ($this->option('month') ?? now()->month);
+        $year = (int) ($this->option('year') ?? now()->year);
 
-    foreach (ActionPlan::with('assignments')->get() as $plan) {
+        foreach (ActionPlan::with('assignments')->get() as $plan) {
 
-        $period = ActionPlanPeriod::firstOrCreate(
+            $period = ActionPlanPeriod::firstOrCreate(
+                [
+                    'action_plan_id' => $plan->id,
+                    'month' => $month,
+                    'year' => $year,
+                ],
+                [
+                    'period_start' => Carbon::create($year, $month, 1),
 
-            [
-                'action_plan_id' => $plan->id,
-                'month' => $month,
-                'year' => $year,
-            ],
+                    'period_end' => Carbon::create($year, $month, 1)
+                        ->endOfMonth(),
 
-            [
-                'period_start' => Carbon::create($year, $month, 1),
+                    'submission_start' => Carbon::create($year, $month, 1)
+                        ->addMonth()
+                        ->startOfMonth(),
 
-                'period_end' => Carbon::create($year, $month, 1)
-                    ->endOfMonth(),
+                    'submission_deadline' => Carbon::create($year, $month, 1)
+                        ->addMonth()
+                        ->startOfMonth()
+                        ->addDays(5),
 
-                'submission_start' => Carbon::create($year, $month, 1)
-                    ->addMonth()
-                    ->startOfMonth(),
+                    'review_start' => Carbon::create($year, $month, 1)
+                        ->addMonth()
+                        ->startOfMonth(),
 
-                'submission_deadline' => Carbon::create($year, $month, 1)
-                    ->addMonth()
-                    ->startOfMonth()
-                    ->addDays(5),
+                    'review_end' => Carbon::create($year, $month, 1)
+                        ->addMonth()
+                        ->startOfMonth()
+                        ->addDays(5),
 
-                'review_start' => Carbon::create($year, $month, 1)
-                    ->addMonth()
-                    ->startOfMonth(),
+                    'approval_date' => Carbon::create($year, $month, 1)
+                        ->addMonth()
+                        ->startOfMonth()
+                        ->addDays(5),
 
-                'review_end' => Carbon::create($year, $month, 1)
-                    ->addMonth()
-                    ->startOfMonth()
-                    ->addDays(5),
+                    'status' => 'Open',
+                ]
+            );
 
-                'approval_date' => Carbon::create($year, $month, 1)
-                    ->addMonth()
-                    ->startOfMonth()
-                    ->addDays(5),
-
-                'status' => 'Open',
-            ]
-        );
-
-        // Create assignments for this month's period
-        foreach ($plan->assignments as $assignment) {
-
-            $period->assignments()->firstOrCreate([
-                'action_plan_id' => $plan->id,
-                'responsible_unit_id' => $assignment->responsible_unit_id,
-            ], [
-                'progress_percentage' => 0,
-                'status' => 'Not Yet Submitted',
-            ]);
+            foreach ($plan->assignments as $assignment) {
+                $period->assignments()->firstOrCreate([
+                    'action_plan_id' => $plan->id,
+                    'responsible_unit_id' => $assignment->responsible_unit_id,
+                ], [
+                    'progress_percentage' => 0,
+                    'status' => 'Not Yet Submitted',
+                ]);
+            }
         }
+
+        $this->info("Periods generated for {$year}-{$month}.");
+
+        return self::SUCCESS;
     }
-
-    $this->info('Monthly periods generated successfully.');
-
-    return self::SUCCESS;
-}
 }

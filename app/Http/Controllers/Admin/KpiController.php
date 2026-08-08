@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Kpi\StoreKpiRequest;
 use App\Http\Requests\Admin\Kpi\UpdateKpiRequest;
 use App\Models\KeyPerformanceIndicator\Kpi;
-use App\Models\KeyResultArea\Kra;
+use App\Models\SubKeyResultsArea\SubKra;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,13 +15,15 @@ class KpiController extends Controller
 {
     public function index(): Response
     {
-        $kpis = Kpi::with('kra:id,name')
+        $kpis = Kpi::with('subkra:id,kra_id,code,name')
             ->orderBy('order_no')
             ->get();
 
         return Inertia::render('admin/kpi/index', [
             'kpis' => $kpis,
-            'kras' => Kra::select('id', 'code', 'name')->orderBy('order_no')->get(),
+            'subkras' => SubKra::select('id', 'kra_id', 'code', 'name')
+                ->orderBy('order_no')
+                ->get(),
         ]);
     }
 

@@ -15,7 +15,7 @@ export type Kpi = {
     code: string;
     name: string;
     order_no: number;
-    kra: { id: number; name: string } | null;
+    subkra: { id: number; code?: string; name: string } | null;
 };
 
 interface ColumnsProps {
@@ -25,14 +25,20 @@ interface ColumnsProps {
 
 export function columns({ onEdit, onDelete }: ColumnsProps): ColumnDef<Kpi>[] {
     return [
-        // 1. KRA moved to the very first position
-        // 2. Code is now second
+        {
+            accessorKey: 'subkra',
+            header: 'Sub-KRA',
+            cell: ({ row }) => {
+                const subkra = row.original.subkra;
+                if (!subkra) return '—';
+                return subkra.code
+                    ? `${subkra.code} - ${subkra.name}`
+                    : subkra.name;
+            },
+        },
         { accessorKey: 'code', header: 'Code' },
-        // 3. Name is third
         { accessorKey: 'name', header: 'Name' },
-        // 4. Order is fourth
         { accessorKey: 'order_no', header: 'Order' },
-        // 5. Actions at the end
         {
             id: 'actions',
             header: '',

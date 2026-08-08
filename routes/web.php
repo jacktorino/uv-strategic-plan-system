@@ -31,7 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('responsible-units', ResponsibleUnitController::class);
-    Route::resource('accounts', UserController::class);
+    Route::resource('accounts', UserController::class)->parameters(['accounts' => 'user']);
     Route::resource('kpis', KpiController::class);
     Route::resource('action-plans', ActionPlanController::class);
 

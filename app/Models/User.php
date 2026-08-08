@@ -19,6 +19,7 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Models\Assignment\ActionPlanAssignment;
+use App\Models\SubKeyResultsArea\SubKra;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -42,6 +43,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'password',
     'role',
     'responsible_unit_id',
+    'subkra_id',
 ])]
 #[Hidden([
     'password',
@@ -110,6 +112,11 @@ class User extends Authenticatable implements PasskeyUser
     {
         return $this->role === 'kra_incharge';
     }
+
+    public function subKra(): BelongsTo
+{
+    return $this->belongsTo(SubKra::class, 'subkra_id');
+}
 
     /**
      * Check if the user belongs to a responsible unit.

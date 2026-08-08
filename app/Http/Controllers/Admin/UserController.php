@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
-use App\Mail\AccountCreated;
-use App\Models\ResponsibleUnit;
+
+
 use App\Models\ResponsibleUnit\Units;
+use App\Models\SubKeyResultsArea\SubKra;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +28,7 @@ class UserController extends Controller
 
     public function index(): Response
     {
-        $users = User::with('responsibleUnit:id,name')
+        $users = User::with(['responsibleUnit:id,name', 'subKra:id,code,name'])
             ->orderBy('name')
             ->get()
             ->map(fn (User $user) => [
@@ -37,6 +37,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
                 'responsible_unit' => $user->responsibleUnit,
+                'sub_kra' => $user->subKra,
             ]);
 
         return Inertia::render('admin/user/index', [
@@ -44,6 +45,9 @@ class UserController extends Controller
             'roles' => $this->roles,
             'units' => Units::select('id', 'name')
                 ->orderBy('name')
+                ->get(),
+            'subkras' => SubKra::select('id', 'code', 'name')
+                ->orderBy('code')
                 ->get(),
         ]);
     }
@@ -57,13 +61,9 @@ class UserController extends Controller
             'password' => Hash::make($temporaryPassword),
         ]);
 
-        Mail::to($user->email)->send(
-            new AccountCreated($user->name, $user->email, $temporaryPassword)
-        );
-
         return redirect()
             ->route('accounts.index')
-            ->with('success', 'Account created and credentials emailed.');
+            ->with('success', 'Account created');
     }
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse

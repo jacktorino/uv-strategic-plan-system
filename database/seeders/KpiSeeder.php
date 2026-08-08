@@ -159,13 +159,13 @@ class KpiSeeder extends Seeder
         ];
     }
 
-    public function run(): void
+   public function run(): void
     {
-        foreach ($this->data() as $kraCode => $kpis) {
-            $kra = Kra::where('code', $kraCode)->first();
+        foreach ($this->data() as $subKraCode => $kpis) {
+            $subkra = \App\Models\SubKeyResultsArea\SubKra::where('code', $subKraCode)->first();
 
-            if (! $kra) {
-                $this->command?->warn("KRA {$kraCode} not found, skipping its KPIs.");
+            if (! $subkra) {
+                $this->command?->warn("Sub-KRA {$subKraCode} not found, skipping its KPIs.");
                 continue;
             }
 
@@ -173,7 +173,7 @@ class KpiSeeder extends Seeder
                 Kpi::updateOrCreate(
                     ['code' => $code],
                     [
-                        'kra_id' => $kra->id,
+                        'subkra_id' => $subkra->id,
                         'name' => $name,
                         'order_no' => $order + 1,
                     ]

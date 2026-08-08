@@ -3,34 +3,42 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Assignment\ActionPlanAssignment;
 use App\Models\InnovativeActionPlan\ActionPlan;
+use App\Models\KeyPerformanceIndicator\Kpi;
+use App\Models\ActionPlanPeriod;
 use App\Models\User;
+use Carbon\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
     /**
+     * Statuses that count as "submitted" for reporting purposes.
+     * Matches ActionPlanAssignmentController@updateProgress and the
+     * store()/update() defaults in ActionPlanController.
+     */
+    private const SUBMITTED_STATUSES = ['Submitted', 'Approved', 'Rejected'];
+
+    /**
      * Display the admin dashboard with real-time strategic plan metrics.
      */
     public function index(): Response
     {
-        // 1. Fetch action plans with their assignments and KPI structures
         $actionPlans = ActionPlan::with([
             'kpi.kra',
             'assignments.responsibleUnit',
         ])->get();
 
-        // 2. Active submissions count (assignments where status is submitted or progress is 100)
         $activeSubmissionsCount = 0;
-        
-        // Prepare KPI stats mapping
+
+        // Aggregate by KPI id and KRA id (not code/name — those can be
+        // null or collide across records, silently merging unrelated rows).
         $kpiMap = [];
-        // Prepare KRA stats mapping
         $kraMap = [];
 
         foreach ($actionPlans as $plan) {
-            // Calculate plan progress based on units/assignments average
             $assignments = $plan->assignments;
             $unitCount = $assignments->count();
             $totalProgress = 0;
@@ -39,67 +47,70 @@ class DashboardController extends Controller
                 $progress = (int) ($assignment->progress_percentage ?? 0);
                 $totalProgress += $progress;
 
-                if ($assignment->status === 'submitted' || !empty($assignment->submitted_at) || $progress === 100) {
+                if (in_array($assignment->status, self::SUBMITTED_STATUSES, true)) {
                     $activeSubmissionsCount++;
                 }
             }
 
             $planProgress = $unitCount > 0 ? (int) round($totalProgress / $unitCount) : 0;
 
-            // Aggregate by KPI
             if ($plan->kpi) {
-                $kpiKey = $plan->kpi->code ?? $plan->kpi->name;
-                if (!isset($kpiMap[$kpiKey])) {
-                    $kpiMap[$kpiKey] = ['name' => $kpiKey, 'total' => 0, 'count' => 0];
-                }
-                $kpiMap[$kpiKey]['total'] += $planProgress;
-                $kpiMap[$kpiKey]['count']++;
-            }
+                $kpiId = $plan->kpi->id;
+                $kpiMap[$kpiId] ??= [
+                    'name' => $plan->kpi->code ?? $plan->kpi->name,
+                    'total' => 0,
+                    'count' => 0,
+                ];
+                $kpiMap[$kpiId]['total'] += $planProgress;
+                $kpiMap[$kpiId]['count']++;
 
-            // Aggregate by KRA
-            $kra = $plan->kpi?->kra;
-            if ($kra) {
-                $kraKey = $kra->code ?? $kra->name;
-                if (!isset($kraMap[$kraKey])) {
-                    $kraMap[$kraKey] = ['kra' => $kraKey, 'total' => 0, 'count' => 0];
+                $kra = $plan->kpi->kra;
+                if ($kra) {
+                    $kraMap[$kra->id] ??= [
+                        'kra' => $kra->code ?? $kra->name,
+                        'total' => 0,
+                        'count' => 0,
+                    ];
+                    $kraMap[$kra->id]['total'] += $planProgress;
+                    $kraMap[$kra->id]['count']++;
                 }
-                $kraMap[$kraKey]['total'] += $planProgress;
-                $kraMap[$kraKey]['count']++;
             }
         }
 
-        // Format KPI stats for the bar chart
-        $kpiStats = collect($kpiMap)->map(function ($item) {
-            return [
-                'name' => $item['name'],
-                'progress' => $item['count'] > 0 ? (int) round($item['total'] / $item['count']) : 0,
-            ];
-        })->values();
+        $kpiStats = collect($kpiMap)->map(fn ($item) => [
+            'name' => $item['name'],
+            'progress' => $item['count'] > 0 ? (int) round($item['total'] / $item['count']) : 0,
+        ])->values();
 
-        // Format KRA stats for the pie chart
-        $kraStats = collect($kraMap)->map(function ($item) {
-            return [
-                'kra' => $item['kra'],
-                'progress' => $item['count'] > 0 ? (int) round($item['total'] / $item['count']) : 0,
-            ];
-        })->values();
+        $kraStats = collect($kraMap)->map(fn ($item) => [
+            'kra' => $item['kra'],
+            'progress' => $item['count'] > 0 ? (int) round($item['total'] / $item['count']) : 0,
+        ])->values();
 
-        // Total registered system users
-        $totalUsersCount = User::count();
+        // Real trend: average assignment progress per reporting period
+        // (month/year), across every action plan — not a fixed mock.
+        $assignmentTable = (new ActionPlanAssignment)->getTable();
+        $periodTable = (new ActionPlanPeriod)->getTable();
 
-        // Overall progress trend mockup or calculated over time if historical data exists
-        $overallProgressTrend = [
-            ['month' => 'Jan', 'progress' => 15],
-            ['month' => 'Feb', 'progress' => 30],
-            ['month' => 'Mar', 'progress' => 45],
-            ['month' => 'Apr', 'progress' => 60],
-            ['month' => 'May', 'progress' => 75],
-            ['month' => 'Jun', 'progress' => (int) round($actionPlans->avg(fn($p) => $p->overall_progress) ?? 0)],
-        ];
+        $overallProgressTrend = ActionPlanAssignment::query()
+            ->join($periodTable, "{$assignmentTable}.action_plan_period_id", '=', "{$periodTable}.id")
+            ->selectRaw("{$periodTable}.year as year, {$periodTable}.month as month, AVG({$assignmentTable}.progress_percentage) as avg_progress")
+            ->groupBy("{$periodTable}.year", "{$periodTable}.month")
+            ->orderBy("{$periodTable}.year")
+            ->orderBy("{$periodTable}.month")
+            ->get()
+            ->map(fn ($row) => [
+                'month' => Carbon::createFromDate((int) $row->year, (int) $row->month, 1)->format('M Y'),
+                'progress' => (int) round($row->avg_progress ?? 0),
+            ])
+            ->take(-6) // most recent 6 reporting periods
+            ->values();
 
         return Inertia::render('admin/dashboard', [
             'activeSubmissionsCount' => $activeSubmissionsCount,
-            'totalUsersCount' => $totalUsersCount,
+            'totalUsersCount' => User::count(),
+            'totalKPICount' => Kpi::count(),
+            'totalActionPlanCount' => $actionPlans->count(),
             'kpiStats' => $kpiStats,
             'kraStats' => $kraStats,
             'overallProgressTrend' => $overallProgressTrend,
