@@ -105,11 +105,11 @@ export function AppSidebar() {
                 href: '/action-plans',
                 icon: CheckCircle2,
             },
-            {
-                title: 'Unit Submissions',
-                href: '/unit-assignments',
-                icon: ClipboardList,
-            },
+            // {
+            //     title: 'Unit Submissions',
+            //     href: '/unit-assignments',
+            //     icon: ClipboardList,
+            // },
         ];
     }
 

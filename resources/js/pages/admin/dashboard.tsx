@@ -1,6 +1,6 @@
 import { Head, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
-import { FileText, Users } from 'lucide-react';
+import { FileText, Users, Target, CheckCircle2 } from 'lucide-react';
 
 import {
     Card,
@@ -9,7 +9,6 @@ import {
     CardDescription,
     CardContent,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 import {
     ResponsiveContainer,
@@ -19,9 +18,6 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    PieChart,
-    Pie,
-    Cell,
     AreaChart,
     Area,
 } from 'recharts';
@@ -49,6 +45,8 @@ interface DashboardProps {
     };
     activeSubmissionsCount?: number;
     totalUsersCount?: number;
+    totalKPICount?: number;
+    totalActionPlanCount?: number;
     submissionStats?: SubmissionStat[];
     kpiStats?: KpiStat[];
     kraStats?: KraStat[];
@@ -56,53 +54,27 @@ interface DashboardProps {
     [key: string]: any;
 }
 
-// Chart colors pulled from the app's existing shadcn chart theme
-// (defined as CSS variables in your theme file) rather than
-// hardcoded hex values.
-const CHART_COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-];
-
 export default function Dashboard() {
     const {
-        auth,
         activeSubmissionsCount = 0,
         totalUsersCount = 0,
+        totalKPICount = 0,
+        totalActionPlanCount = 0,
         kpiStats = [],
-        kraStats = [],
         overallProgressTrend = [],
     } = usePage<DashboardProps>().props;
 
-    const userName = auth?.user?.name || 'User';
     const monthLabel = format(new Date(), 'MMMM yyyy');
 
     return (
         <>
             <Head title="Dashboard" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 p-4 md:p-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                            Welcome back, {userName}
-                        </h1>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            Institutional overview for {monthLabel}.
-                        </p>
-                    </div>
-
-                    <Badge variant="secondary" className="w-fit">
-                        On-going
-                    </Badge>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4">
+                {/* Metric Cards */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <Card>
-                        <CardContent className="flex items-center justify-between pt-6">
+                        <CardContent className="flex items-center justify-between p-6">
                             <div>
                                 <p className="text-sm text-muted-foreground">
                                     Active Submissions
@@ -116,7 +88,7 @@ export default function Dashboard() {
                     </Card>
 
                     <Card>
-                        <CardContent className="flex items-center justify-between pt-6">
+                        <CardContent className="flex items-center justify-between p-6">
                             <div>
                                 <p className="text-sm text-muted-foreground">
                                     Total Users
@@ -128,40 +100,80 @@ export default function Dashboard() {
                             <Users className="h-8 w-8 text-muted-foreground" />
                         </CardContent>
                     </Card>
+
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    Total KPI
+                                </p>
+                                <p className="text-3xl font-semibold">
+                                    {totalKPICount}
+                                </p>
+                            </div>
+                            <Target className="h-8 w-8 text-muted-foreground" />
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="flex items-center justify-between p-6">
+                            <div>
+                                <p className="text-sm text-muted-foreground">
+                                    Total Action Plan
+                                </p>
+                                <p className="text-3xl font-semibold">
+                                    {totalActionPlanCount}
+                                </p>
+                            </div>
+                            <CheckCircle2 className="h-8 w-8 text-muted-foreground" />
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {/* KPI Bar Chart */}
+                <div className="grid grid-cols-1 gap-4">
                     <Card>
                         <CardHeader>
                             <CardTitle>Key Performance Indicators</CardTitle>
                             <CardDescription>
-                                Progress by indicator, current period
+                                Progress by indicator, current period (
+                                {monthLabel})
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="h-56">
+                            <div className="h-64 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={kpiStats}>
                                         <CartesianGrid
                                             strokeDasharray="3 3"
                                             vertical={false}
+                                            stroke="var(--border)"
                                         />
                                         <XAxis
                                             dataKey="name"
                                             fontSize={12}
                                             tickLine={false}
                                             axisLine={false}
+                                            stroke="var(--muted-foreground)"
                                         />
                                         <YAxis
                                             fontSize={12}
                                             tickLine={false}
                                             axisLine={false}
                                             domain={[0, 100]}
+                                            stroke="var(--muted-foreground)"
                                         />
-                                        <Tooltip />
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'var(--card)',
+                                                borderColor: 'var(--border)',
+                                                borderRadius: 'var(--radius)',
+                                                color: 'var(--card-foreground)',
+                                            }}
+                                        />
                                         <Bar
                                             dataKey="progress"
-                                            fill={CHART_COLORS[0]}
+                                            fill="var(--chart-1)"
                                             radius={[4, 4, 0, 0]}
                                         />
                                     </BarChart>
@@ -169,86 +181,9 @@ export default function Dashboard() {
                             </div>
                         </CardContent>
                     </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>KRA Progress Distribution</CardTitle>
-                            <CardDescription>
-                                Share of progress by key result area
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                                <div className="h-40 flex-shrink-0 sm:w-40">
-                                    <ResponsiveContainer
-                                        width="100%"
-                                        height="100%"
-                                    >
-                                        <PieChart>
-                                            <Pie
-                                                data={kraStats}
-                                                dataKey="progress"
-                                                nameKey="kra"
-                                                cx="50%"
-                                                cy="50%"
-                                                outerRadius={65}
-                                                innerRadius={38}
-                                                label={false}
-                                            >
-                                                {kraStats.map((_, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={
-                                                            CHART_COLORS[
-                                                                index %
-                                                                    CHART_COLORS.length
-                                                            ]
-                                                        }
-                                                    />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-
-                                <ul className="min-w-0 flex-1 space-y-1.5">
-                                    {kraStats.length === 0 && (
-                                        <li className="text-sm text-muted-foreground">
-                                            No KRA data yet.
-                                        </li>
-                                    )}
-                                    {kraStats.map((stat, index) => (
-                                        <li
-                                            key={stat.kra}
-                                            className="flex items-center justify-between gap-2 text-sm"
-                                        >
-                                            <span className="flex min-w-0 items-center gap-2">
-                                                <span
-                                                    className="h-2 w-2 flex-shrink-0 rounded-full"
-                                                    style={{
-                                                        backgroundColor:
-                                                            CHART_COLORS[
-                                                                index %
-                                                                    CHART_COLORS.length
-                                                            ],
-                                                    }}
-                                                />
-                                                <span className="truncate">
-                                                    {stat.kra}
-                                                </span>
-                                            </span>
-                                            <span className="flex-shrink-0 font-semibold">
-                                                {stat.progress}%
-                                            </span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
 
+                {/* Strategic Plan Area Chart */}
                 <Card className="flex-1">
                     <CardHeader>
                         <CardTitle>Overall Strategic Plan Progress</CardTitle>
@@ -257,7 +192,7 @@ export default function Dashboard() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="h-[320px]">
+                        <div className="h-[320px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={overallProgressTrend}>
                                     <defs>
@@ -270,33 +205,45 @@ export default function Dashboard() {
                                         >
                                             <stop
                                                 offset="5%"
-                                                stopColor={CHART_COLORS[0]}
-                                                stopOpacity={0.3}
+                                                stopColor="var(--chart-2)"
+                                                stopOpacity={0.4}
                                             />
                                             <stop
                                                 offset="95%"
-                                                stopColor={CHART_COLORS[0]}
+                                                stopColor="var(--chart-2)"
                                                 stopOpacity={0}
                                             />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="var(--border)"
+                                    />
                                     <XAxis
                                         dataKey="month"
                                         fontSize={12}
                                         tickLine={false}
+                                        stroke="var(--muted-foreground)"
                                     />
                                     <YAxis
                                         domain={[0, 100]}
                                         fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
+                                        stroke="var(--muted-foreground)"
                                     />
-                                    <Tooltip />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: 'var(--card)',
+                                            borderColor: 'var(--border)',
+                                            borderRadius: 'var(--radius)',
+                                            color: 'var(--card-foreground)',
+                                        }}
+                                    />
                                     <Area
                                         type="monotone"
                                         dataKey="progress"
-                                        stroke={CHART_COLORS[0]}
+                                        stroke="var(--chart-2)"
                                         strokeWidth={2}
                                         fillOpacity={1}
                                         fill="url(#colorProgress)"
@@ -310,3 +257,12 @@ export default function Dashboard() {
         </>
     );
 }
+
+Dashboard.layout = {
+    breadcrumbs: [
+        {
+            title: 'Dashboard',
+            href: '#',
+        },
+    ],
+};
