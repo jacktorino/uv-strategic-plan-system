@@ -33,18 +33,27 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-   public function share(Request $request): array
+public function share(Request $request): array
 {
-    return [
-        ...parent::share($request),
-        'name' => config('app.name'),
+    $user = $request->user();
+
+    if ($user) {
+        // Eager load the relationships if they aren't loaded yet
+        $user->loadMissing(['kra', 'subkra.kra']);
+    }
+
+    return array_merge(parent::share($request), [
         'auth' => [
-            'user' => $request->user(),
+            'user' => $user ? [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'kra' => $user->kra,
+                // Pass subkra (handles both camelCase and snake_case models)
+                'subkra' => $user->subkra ?? $user->sub_kra, 
+            ] : null,
         ],
-        'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-        
-        // Pass demo users list to all Inertia views
-        'demoUsers' => \App\Models\User::select('id', 'name', 'email', 'role')->get(),
-    ];
+    ]);
 }
 }

@@ -1,3 +1,16 @@
+export type Kra = {
+    id: number;
+    code: string;
+    name?: string;
+};
+
+export type SubKra = {
+    id: number;
+    code: string;
+    name?: string;
+    kra_id: number;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -10,9 +23,17 @@ export type User = {
         | 'admin'
         | 'planning_officer'
         | 'kra_incharge'
-        | 'subkra_incharge' // Add this here
+        | 'subkra_incharge'
         | 'responsible_unit'
         | 'viewer';
+
+    // KRA relationship and ID fields
+    kra_id?: number | null;
+    kra?: Kra | null;
+
+    // SubKRA relationship and ID fields
+    subkra_id?: number | null;
+    subkra?: SubKra | null;
 
     created_at: string;
     updated_at: string;

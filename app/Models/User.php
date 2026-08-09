@@ -21,6 +21,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Models\Assignment\ActionPlanAssignment;
 use App\Models\SubKeyResultsArea\SubKra;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
@@ -88,6 +89,11 @@ class User extends Authenticatable implements PasskeyUser
             'kra_user'
         )->withTimestamps();
     }
+
+    public function kra(): HasOne
+{
+    return $this->hasOne(Kra::class);
+}
 
     /**
      * Check if the user is an administrator.

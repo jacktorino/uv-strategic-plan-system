@@ -11,8 +11,7 @@ use App\Http\Controllers\KRA\GovernanceController;
 use App\Http\Controllers\KRA\ResearchController;
 use App\Http\Controllers\KRA\StudentsController;
 use App\Http\Controllers\KRA\TeachingController;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SubKraController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -22,11 +21,20 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Key Result Area Routes
     Route::get('/kra/governance', [GovernanceController::class, 'index'])->name('kra.governance');
     Route::get('/kra/research', [ResearchController::class, 'index'])->name('kra.research');
     Route::get('/kra/teaching', [TeachingController::class, 'index'])->name('kra.teaching');
     Route::get('/kra/community', [CommunityController::class, 'index'])->name('kra.community');
     Route::get('/kra/students', [StudentsController::class, 'index'])->name('kra.students');
+
+    // Direct Sub-KRA Route (e.g., /subkra/1.1)
+    Route::get('/subkra/{code}', [SubKraController::class, 'show'])
+        ->name('subkra.show');
+
+    // Nested Sub-KRA Route (e.g., /kra/governance/1.1)
+    Route::get('/kra/{kraSlug}/{code}', [SubKraController::class, 'show'])
+        ->name('kra.subkra.show');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -40,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('unit-assignments.index');
 
     Route::post('/unit-assignments/{assignment}/update-progress', [ActionPlanAssignmentController::class, 'updateProgress'])
-    ->name('unit-assignments.update-progress');
+        ->name('unit-assignments.update-progress');
 });
 
 require __DIR__.'/settings.php';
